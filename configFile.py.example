@@ -1,0 +1,6 @@
+def token():
+    return ""
+
+def ownerId():
+    return 000000000000000000
+
