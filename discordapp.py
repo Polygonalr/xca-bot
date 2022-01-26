@@ -53,18 +53,24 @@ async def redeem(ctx, arg=None):
             )
     await ctx.reply(embed=embed)
     logs = await redeem_code(arg)
-    if len(logs) == 0:
+    if logs[0]['status'] == 'Invalid redemption code':
         embed = nextcord.Embed(
                 description="Invalid code " + arg + " provided!",
                 colour=nextcord.Colour.brand_red(),
                 )
     else:
+        status_list = map(concat_status_string, logs)
+        description = ""
+        for status in status_list:
+            description += status + "\n"
+        description += "\n Redemption completed!"
         embed = nextcord.Embed(
-                description="Tried to redeem for " + ", ".join(logs),
-                colour=nextcord.Colour.brand_orange(),
+                description=description,
+                colour=nextcord.Colour.gold(),
                 )
     await ctx.reply(embed=embed) 
 
+# TODO retrieve full info
 @bot.command()
 async def abyss(ctx, arg=None):
     if not ctx.channel.name in ['coding-room', 'genshin-bot']:
@@ -157,7 +163,6 @@ async def get_notes(user):
     gs.set_cookie(ltuid=user['ltuid'], ltoken=user['ltoken'])
     return await asyncio.to_thread(gs.get_notes, user['uid'])
 
-# TODO retrieve full info
 async def get_abyss(user):
     gs.set_cookie(ltuid=user['ltuid'], ltoken=user['ltoken'])
     return await asyncio.to_thread(gs.get_spiral_abyss, user['uid'])
@@ -166,14 +171,28 @@ async def redeem_code(code):
     redeemed_users = []
     for acc in data:
         if "cookie_token" in acc:
+            redemptionAttempt = {
+                "name": acc['name'],
+                "status": "Not attempted",
+            }
             gs.set_cookie(ltuid=acc['ltuid'], ltoken=acc['ltoken'], account_id=acc['ltuid'], cookie_token=acc['cookie_token'])
-            # TODO Set different cases for different exceptions
             try:
                 await asyncio.to_thread(gs.redeem_code(code, uid=acc['uid']))
-            except:
-                return []
-            redeemed_users.append(acc['name'])
+            except gs.CodeRedeemException as e:
+                redemptionAttempt['status'] = str(e)
+            except TypeError:
+                # Not too sure why successful redemptions throws a TypeError but this is it.
+                redemptionAttempt['status'] = "Redeemed!"
+            else:
+                redemptionAttempt['status'] = "Something went wrong that is not caught."
+            redeemed_users.append(redemptionAttempt)
+            if redemptionAttempt['status'] == "Invalid redemption code":
+                return redeemed_users
             time.sleep(5)
     return redeemed_users
+
+def concat_status_string(s):
+    return s['name'] + ": " + s['status']
+
 
 bot.run(token())
