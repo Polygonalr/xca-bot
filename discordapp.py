@@ -92,6 +92,11 @@ async def abyss(ctx, arg=None):
                 )
         await ctx.reply(embed=embed)
 
+@bot.command()
+async def RE(ctx):
+    await ctx.reply("There's no need to shout here!")
+    await notes(ctx, None);
+
 @bot.command(aliases=['re'])
 async def notes(ctx, arg=None):
     if not ctx.channel.name in ['coding-room', 'genshin-bot']:
