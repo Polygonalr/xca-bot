@@ -85,11 +85,35 @@ async def abyss(ctx, arg=None):
         desc = ""
         for field, value in stats.items():
             desc += f"{field}: {value}\n"
+
+        floors = spiral_abyss['floors']
+        floor_12 = next((floor for floor in floors if floor['floor'] == 12), None)
         embed = nextcord.Embed(
                 title="Abyss stats for " + user['name'],
                 description=desc,
                 colour=nextcord.Colour.brand_green(),
                 )
+        if floor_12 != None:
+            embed.add_field(name='Showing stats for floor 12 only.', value='\u200b', inline=False)
+            firsthalf = ""
+            secondhalf = ""
+            stars = ""
+            for chamber in floor_12['chambers']:
+                battles = chamber['battles']
+                for chars in battles[0]['characters']:
+                    firsthalf += chars['name'] + ' (lvl ' + str(chars['level']) + ')' + '\n'
+                firsthalf += "\n"
+                for chars in battles[1]['characters']:
+                    secondhalf += chars['name'] + ' (lvl ' + str(chars['level']) + ')' + '\n'
+                    stars += "\n"
+                secondhalf += "\n"
+                stars += str(chamber['stars']) + " stars\n"
+            embed.add_field(name='1st half', value=firsthalf)
+            embed.add_field(name='2nd half', value=secondhalf)
+            embed.add_field(name='Stars', value=stars)
+        else:
+            not_found_msg = f"{user['name']} has not attempted floor 12 yet!"
+            embed.add_field(name=not_found_msg, value='\u200b')
         await ctx.reply(embed=embed)
 
 @bot.command()
