@@ -23,6 +23,16 @@ def restrict_channel(ctx):
     return False
 
 @bot.event
+async def on_message(ctx):
+    if isinstance(ctx.channel, nextcord.channel.DMChannel):
+        if bot.user.mentioned_in(ctx):
+            if (len(ctx.stickers) != 0):
+                await ctx.reply("`" + ctx.stickers[0].url + "`")
+            else:
+                await ctx.reply("`" + ctx.content + "`")
+    await bot.process_commands(ctx)
+
+@bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
     await bot.change_presence(activity=nextcord.Activity(name="the cookie jar", type=nextcord.ActivityType.listening))
@@ -32,9 +42,44 @@ async def ping(ctx):
     await ctx.reply('Pong!')
 
 @bot.command()
+async def remind(ctx, reminder, time):
+    remind_time = datetime.datetime.strptime(time, '%H:%M:%S')
+    seconds_to_reminder = (remind_time - datetime.datetime(1970,1,1)).seconds
+    embed = nextcord.Embed(
+            description="Setting a reminder: " + reminder + ". Time set: " + str(seconds_to_reminder) + " seconds later.",
+            colour=nextcord.Colour.gold(),
+            )
+    await ctx.reply(embed=embed)
+    await asyncio.sleep(seconds_to_reminder)
+    embed = nextcord.Embed(
+            description="Reminder: " + reminder,
+            colour=nextcord.Colour.brand_green(),
+            )
+    await ctx.reply(embed=embed)
+
+
+@bot.command()
 async def checkinlogs(ctx):
     logs = open("../checkin-log.txt", "r")
     await ctx.reply("```" + logs.read() + "```")
+
+@bot.command()
+async def reloadcookies(ctx):
+    if ctx.author.id != ownerId():
+        embed = nextcord.Embed(
+                description="Error: only my master can use this command uwu",
+                colour=nextcord.Colour.brand_red(),
+                )
+        await ctx.reply(embed=embed)
+        return
+    with open(os.path.join(__location__, 'cookies.json')) as f:
+        data = json.load(f)
+        embed = nextcord.Embed(
+                description="Cookies reloaded!",
+                colour=nextcord.Colour.brand_green(),
+                )
+        await ctx.reply(embed=embed)
+
 
 @bot.command()
 async def redeem(ctx, arg=None):
