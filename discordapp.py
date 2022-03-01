@@ -122,27 +122,38 @@ async def redeem(ctx, arg=None):
 
 # TODO retrieve full info
 @bot.command()
-async def abyss(ctx, arg=None):
+async def abyss(ctx, arg=None, arg2=None):
     if not restrict_channel(ctx):
         return
-    if arg == None:
+    prevFlag = False
+    if arg == None or arg == "prev":
         user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
     else:
         user = next((acc for acc in data if acc['name'] == arg), None)
+    if arg == "prev" or arg2 == "prev":
+        prevFlag = True
     if user != None:
-        spiral_abyss = await get_abyss(user)
+        spiral_abyss = await get_abyss(user, prevFlag)
         stats = spiral_abyss['stats']
         desc = ""
         for field, value in stats.items():
-            desc += f"{field}: {value}\n"
+            readable_field = field.capitalize().replace("_", " ")
+            desc += f"{readable_field}: {value}\n"
 
         floors = spiral_abyss['floors']
         floor_12 = next((floor for floor in floors if floor['floor'] == 12), None)
-        embed = nextcord.Embed(
-                title="Abyss stats for " + user['name'],
-                description=desc,
-                colour=nextcord.Colour.brand_green(),
-                )
+        if prevFlag:
+            embed = nextcord.Embed(
+                    title="Previous cycle abyss stats for " + user['name'],
+                    description=desc,
+                    colour=nextcord.Colour.brand_green(),
+                    )
+        else:
+            embed = nextcord.Embed(
+                    title="Abyss stats for " + user['name'],
+                    description=desc,
+                    colour=nextcord.Colour.brand_green(),
+                    )
         if floor_12 != None:
             embed.add_field(name='Showing stats for floor 12 only.', value='\u200b', inline=False)
             firsthalf = ""
@@ -244,9 +255,9 @@ async def get_notes(user):
     gs.set_cookie(ltuid=user['ltuid'], ltoken=user['ltoken'])
     return await asyncio.to_thread(gs.get_notes, user['uid'])
 
-async def get_abyss(user):
+async def get_abyss(user, prevFlag):
     gs.set_cookie(ltuid=user['ltuid'], ltoken=user['ltoken'])
-    return await asyncio.to_thread(gs.get_spiral_abyss, user['uid'])
+    return await asyncio.to_thread(gs.get_spiral_abyss, user['uid'], prevFlag)
 
 async def redeem_code(code):
     redeemed_users = []
