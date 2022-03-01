@@ -17,6 +17,11 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 with open(os.path.join(__location__, 'cookies.json')) as f:
     data = json.load(f)
 
+def restrict_channel(ctx):
+    if isinstance(ctx.channel, nextcord.channel.DMChannel) or ctx.channel.name in ['coding-room', 'genshin-bot']:
+        return True
+    return False
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
@@ -73,7 +78,7 @@ async def redeem(ctx, arg=None):
 # TODO retrieve full info
 @bot.command()
 async def abyss(ctx, arg=None):
-    if not ctx.channel.name in ['coding-room', 'genshin-bot']:
+    if not restrict_channel(ctx):
         return
     if arg == None:
         user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
@@ -118,12 +123,14 @@ async def abyss(ctx, arg=None):
 
 @bot.command()
 async def RE(ctx):
+    if not restrict_channel(ctx):
+        return
     await ctx.reply("There's no need to shout here!")
     await notes(ctx, None);
 
 @bot.command(aliases=['re'])
 async def notes(ctx, arg=None):
-    if not ctx.channel.name in ['coding-room', 'genshin-bot']:
+    if not restrict_channel(ctx):
         return
     if arg == None:
         user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
