@@ -17,6 +17,21 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 with open(os.path.join(__location__, 'cookies.json')) as f:
     data = json.load(f)
 
+def restrict_channel(ctx):
+    if isinstance(ctx.channel, nextcord.channel.DMChannel) or ctx.channel.name in ['coding-room', 'genshin-bot']:
+        return True
+    return False
+
+@bot.event
+async def on_message(ctx):
+    if isinstance(ctx.channel, nextcord.channel.DMChannel):
+        if bot.user.mentioned_in(ctx):
+            if (len(ctx.stickers) != 0):
+                await ctx.reply("`" + ctx.stickers[0].url + "`")
+            else:
+                await ctx.reply("`" + ctx.content + "`")
+    await bot.process_commands(ctx)
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
@@ -27,9 +42,44 @@ async def ping(ctx):
     await ctx.reply('Pong!')
 
 @bot.command()
+async def remind(ctx, reminder, time):
+    remind_time = datetime.datetime.strptime(time, '%H:%M:%S')
+    seconds_to_reminder = (remind_time - datetime.datetime(1970,1,1)).seconds
+    embed = nextcord.Embed(
+            description="Setting a reminder: " + reminder + ". Time set: " + str(seconds_to_reminder) + " seconds later.",
+            colour=nextcord.Colour.gold(),
+            )
+    await ctx.reply(embed=embed)
+    await asyncio.sleep(seconds_to_reminder)
+    embed = nextcord.Embed(
+            description="Reminder: " + reminder,
+            colour=nextcord.Colour.brand_green(),
+            )
+    await ctx.reply(embed=embed)
+
+
+@bot.command()
 async def checkinlogs(ctx):
     logs = open("../checkin-log.txt", "r")
     await ctx.reply("```" + logs.read() + "```")
+
+@bot.command()
+async def reloadcookies(ctx):
+    if ctx.author.id != ownerId():
+        embed = nextcord.Embed(
+                description="Error: only my master can use this command uwu",
+                colour=nextcord.Colour.brand_red(),
+                )
+        await ctx.reply(embed=embed)
+        return
+    with open(os.path.join(__location__, 'cookies.json')) as f:
+        data = json.load(f)
+        embed = nextcord.Embed(
+                description="Cookies reloaded!",
+                colour=nextcord.Colour.brand_green(),
+                )
+        await ctx.reply(embed=embed)
+
 
 @bot.command()
 async def redeem(ctx, arg=None):
@@ -72,34 +122,71 @@ async def redeem(ctx, arg=None):
 
 # TODO retrieve full info
 @bot.command()
-async def abyss(ctx, arg=None):
-    if not ctx.channel.name in ['coding-room', 'genshin-bot']:
+async def abyss(ctx, arg=None, arg2=None):
+    if not restrict_channel(ctx):
         return
-    if arg == None:
+    prevFlag = False
+    if arg == None or arg == "prev":
         user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
     else:
         user = next((acc for acc in data if acc['name'] == arg), None)
+    if arg == "prev" or arg2 == "prev":
+        prevFlag = True
     if user != None:
-        spiral_abyss = await get_abyss(user)
+        spiral_abyss = await get_abyss(user, prevFlag)
         stats = spiral_abyss['stats']
         desc = ""
         for field, value in stats.items():
-            desc += f"{field}: {value}\n"
-        embed = nextcord.Embed(
-                title="Abyss stats for " + user['name'],
-                description=desc,
-                colour=nextcord.Colour.brand_green(),
-                )
+            readable_field = field.capitalize().replace("_", " ")
+            desc += f"{readable_field}: {value}\n"
+
+        floors = spiral_abyss['floors']
+        floor_12 = next((floor for floor in floors if floor['floor'] == 12), None)
+        if prevFlag:
+            embed = nextcord.Embed(
+                    title="Previous cycle abyss stats for " + user['name'],
+                    description=desc,
+                    colour=nextcord.Colour.brand_green(),
+                    )
+        else:
+            embed = nextcord.Embed(
+                    title="Abyss stats for " + user['name'],
+                    description=desc,
+                    colour=nextcord.Colour.brand_green(),
+                    )
+        if floor_12 != None:
+            embed.add_field(name='Showing stats for floor 12 only.', value='\u200b', inline=False)
+            firsthalf = ""
+            secondhalf = ""
+            stars = ""
+            for chamber in floor_12['chambers']:
+                battles = chamber['battles']
+                for chars in battles[0]['characters']:
+                    firsthalf += chars['name'] + ' (lvl ' + str(chars['level']) + ')' + '\n'
+                firsthalf += "\n"
+                for chars in battles[1]['characters']:
+                    secondhalf += chars['name'] + ' (lvl ' + str(chars['level']) + ')' + '\n'
+                    stars += "\n"
+                secondhalf += "\n"
+                stars += str(chamber['stars']) + " stars\n"
+            embed.add_field(name='1st half', value=firsthalf)
+            embed.add_field(name='2nd half', value=secondhalf)
+            embed.add_field(name='Stars', value=stars)
+        else:
+            not_found_msg = f"{user['name']} has not attempted floor 12 yet!"
+            embed.add_field(name=not_found_msg, value='\u200b')
         await ctx.reply(embed=embed)
 
 @bot.command()
 async def RE(ctx):
+    if not restrict_channel(ctx):
+        return
     await ctx.reply("There's no need to shout here!")
     await notes(ctx, None);
 
 @bot.command(aliases=['re'])
 async def notes(ctx, arg=None):
-    if not ctx.channel.name in ['coding-room', 'genshin-bot']:
+    if not restrict_channel(ctx):
         return
     if arg == None:
         user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
@@ -109,7 +196,6 @@ async def notes(ctx, arg=None):
         try:
             notes = await get_notes(user)
 
-
             # resin section
             desc = "<:resin:927403591818420265>" + str(notes['resin']) + "/160 "
             if int(notes['until_resin_limit']) == 0:
@@ -118,9 +204,17 @@ async def notes(ctx, arg=None):
                 maxout_time = datetime.datetime.now() + datetime.timedelta(seconds=int(notes['until_resin_limit']))
                 desc += maxout_time.strftime("(Maxout - %I:%M %p)")
 
+            desc += "\n\n"
+
+            # realm currency section
+            if int(notes['until_realm_currency_limit']) == 0:
+                desc += "<:realmcurrency:948030718087405598>Either your teapot has capped currency, or is empty.\n(Blame Hoyoverse for not being specific!)"
+            else:
+                desc += "<:realmcurrency:948030718087405598>" + str(notes['realm_currency']) + "/" + str(notes['max_realm_currency']) 
+
             # commission section
-            # if notes['claimed_commission_reward'] == False:
-                # desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
+            if notes['claimed_commission_reward'] == False:
+                desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
 
             desc += "\n\nExpeditions:\n"
             for idx, exp in enumerate(notes['expeditions']):
@@ -168,9 +262,9 @@ async def get_notes(user):
     gs.set_cookie(ltuid=user['ltuid'], ltoken=user['ltoken'])
     return await asyncio.to_thread(gs.get_notes, user['uid'])
 
-async def get_abyss(user):
+async def get_abyss(user, prevFlag):
     gs.set_cookie(ltuid=user['ltuid'], ltoken=user['ltoken'])
-    return await asyncio.to_thread(gs.get_spiral_abyss, user['uid'])
+    return await asyncio.to_thread(gs.get_spiral_abyss, user['uid'], prevFlag)
 
 async def redeem_code(code):
     redeemed_users = []
