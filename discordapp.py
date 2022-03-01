@@ -196,7 +196,6 @@ async def notes(ctx, arg=None):
         try:
             notes = await get_notes(user)
 
-
             # resin section
             desc = "<:resin:927403591818420265>" + str(notes['resin']) + "/160 "
             if int(notes['until_resin_limit']) == 0:
@@ -205,9 +204,17 @@ async def notes(ctx, arg=None):
                 maxout_time = datetime.datetime.now() + datetime.timedelta(seconds=int(notes['until_resin_limit']))
                 desc += maxout_time.strftime("(Maxout - %I:%M %p)")
 
+            desc += "\n\n"
+
+            # realm currency section
+            if int(notes['until_realm_currency_limit']) == 0:
+                desc += "<:realmcurrency:948030718087405598>Either your teapot has capped currency, or is empty.\n(Blame Hoyoverse for not being specific!)"
+            else:
+                desc += "<:realmcurrency:948030718087405598>" + str(notes['realm_currency']) + "/" + str(notes['max_realm_currency']) 
+
             # commission section
-            # if notes['claimed_commission_reward'] == False:
-                # desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
+            if notes['claimed_commission_reward'] == False:
+                desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
 
             desc += "\n\nExpeditions:\n"
             for idx, exp in enumerate(notes['expeditions']):
