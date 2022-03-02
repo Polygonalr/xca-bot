@@ -213,8 +213,8 @@ async def notes(ctx, arg=None):
                 desc += "<:realmcurrency:948030718087405598>" + str(notes['realm_currency']) + "/" + str(notes['max_realm_currency']) 
 
             # commission section
-            if notes['claimed_commission_reward'] == False:
-                desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
+            #if notes['claimed_commission_reward'] == False:
+                #desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
 
             desc += "\n\nExpeditions:\n"
             for idx, exp in enumerate(notes['expeditions']):
