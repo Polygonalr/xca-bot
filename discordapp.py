@@ -168,7 +168,7 @@ async def abyss(ctx, arg=None, arg2=None):
                     secondhalf += chars['name'] + ' (lvl ' + str(chars['level']) + ')' + '\n'
                     stars += "\n"
                 secondhalf += "\n"
-                stars += str(chamber['stars']) + " stars\n"
+                stars += str(chamber['stars']) + " <:abyssstar:948380524462878760>\n"
             embed.add_field(name='1st half', value=firsthalf)
             embed.add_field(name='2nd half', value=secondhalf)
             embed.add_field(name='Stars', value=stars)
