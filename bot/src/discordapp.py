@@ -254,7 +254,7 @@ async def notes(ctx, name=None):
                 maxout_time = datetime.datetime.now() + datetime.timedelta(seconds=int(notes.remaining_resin_recovery_time))
                 desc += maxout_time.strftime("(Maxout - %I:%M %p)")
 
-            desc += "\n\n"
+            desc += "\n"
 
             # realm currency section
             if int(notes.remaining_realm_currency_recovery_time) == 0:
@@ -265,6 +265,14 @@ async def notes(ctx, name=None):
             # commission section
             #if notes['claimed_commission_reward'] == False:
                 #desc += "\n\nCommissions not done! <:nonoseganyu:927411234226176040>"
+
+            # parametric transformer
+            desc += "\n<:parametric:971723428543479849> "
+            if int(notes.remaining_transformer_recovery_time) == 0:
+                desc += "Ready to use!"
+            else:
+                epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time)
+                desc +="<t:" + str(epoch_time) + ":R>"
 
             desc += "\n\nExpeditions:\n"
             for idx, exp in enumerate(notes.expeditions):
@@ -310,7 +318,12 @@ async def notes(ctx, name=None):
 
 async def get_notes(user):
     client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
-    return await client.get_genshin_notes(uid=user['uid'])
+    notes = await client.get_genshin_notes(uid=user['uid'])
+    # Force the API to actually give me the transformer recovery time
+    # Still not sure whether this is the library's fault
+    while notes.remaining_transformer_recovery_time is None:
+        notes = await client.get_genshin_notes(uid=user['uid'])
+    return notes
 
 async def get_abyss(user, prevFlag):
     client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
