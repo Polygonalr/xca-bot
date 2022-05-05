@@ -2,6 +2,7 @@ import nextcord
 import json
 import os
 import asyncio
+import traceback
 from nextcord.ext import commands
 import genshin as gs
 import sys
@@ -304,7 +305,7 @@ async def notes(ctx, name=None):
         except Exception as e:
             embed = nextcord.Embed(
                     title="Exception occured",
-                    description=e,
+                    description=traceback.format_exc(),
                     colour=nextcord.Colour.brand_red(),
                     )
             await ctx.reply(embed=embed)
