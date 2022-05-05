@@ -2,7 +2,7 @@ import os
 import time
 import datetime
 import json
-import genshinstats as gs
+import genshin as gs
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -15,8 +15,8 @@ def check_everyone_in():
     logs = open("checkin-log.txt", "w")
     logs.write("Checking in! " + datetime.datetime.now().isoformat() + "\n")
     for i, acc in enumerate(data):
-        gs.set_cookie(ltuid=acc["ltuid"], ltoken=acc["ltoken"])
-        if gs.claim_daily_reward():
+        client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']}, game=genshin.Game.GENSHIN)
+        if client.claim_daily_reward(reward=False):
             logs.write("Successfully signed in for {}".format(acc["name"]) + "\n")
         else:
             logs.write("Failed sign in for {}".format(acc["name"]) + "\n")
