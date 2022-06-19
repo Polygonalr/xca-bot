@@ -15,7 +15,7 @@ bot.remove_command('help')
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-with open(os.path.join(__location__, 'cookies.json')) as f:
+with open(os.path.join(__location__, '../../cookies.json')) as f:
     data = json.load(f)
 
 def restrict_channel(ctx):
@@ -72,7 +72,7 @@ async def remind(ctx, reminder, time):
 
 @bot.command(description="Check logs for automatic daily Hoyolab check-in.")
 async def checkinlogs(ctx):
-    logs = open("../checkin-log.txt", "r")
+    logs = open("../../../checkin-log.txt", "r")
     await ctx.reply("```" + logs.read() + "```")
 
 @bot.command(description="[Owner-locked] Reloads cookies from cookies.json.")
@@ -249,17 +249,17 @@ async def notes(ctx, name=None):
 
             # resin section
             desc = "<:resin:927403591818420265>" + str(notes.current_resin) + "/160 "
-            if int(notes.remaining_resin_recovery_time) == 0:
+            if int(notes.remaining_resin_recovery_time.total_seconds()) == 0:
                 desc += "<:KleeDerp:861458796772589608>"
             else:
-                maxout_time = datetime.datetime.now() + datetime.timedelta(seconds=int(notes.remaining_resin_recovery_time))
+                maxout_time = datetime.datetime.now() + notes.remaining_resin_recovery_time
                 desc += maxout_time.strftime("(Maxout - %I:%M %p)")
 
             desc += "\n"
 
             # realm currency section
-            if int(notes.remaining_realm_currency_recovery_time) == 0:
-                desc += "<:realmcurrency:948030718087405598>Either your teapot has capped currency, or is empty.\n(Blame Hoyoverse for not being specific!)"
+            if int(notes.remaining_realm_currency_recovery_time.total_seconds()) == 0:
+                desc += "<:realmcurrency:948030718087405598>Your teapot currency is probably full."
             else:
                 desc += "<:realmcurrency:948030718087405598>" + str(notes.current_realm_currency) + "/" + str(notes.max_realm_currency) 
 
@@ -269,19 +269,19 @@ async def notes(ctx, name=None):
 
             # parametric transformer
             desc += "\n<:parametric:971723428543479849> "
-            if int(notes.remaining_transformer_recovery_time) == 0:
+            if int(notes.remaining_transformer_recovery_time.total_seconds()) == 0:
                 desc += "Ready to use!"
             else:
-                epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time)
+                epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
                 desc +="<t:" + str(epoch_time) + ":R>"
 
             desc += "\n\nExpeditions:\n"
             for idx, exp in enumerate(notes.expeditions):
                 desc += str(idx + 1) + ". "
                 if exp.status == 'Ongoing':
-                    hours = int(int(exp.remaining_time) / 60 / 60)
-                    mins = int(int(exp.remaining_time) / 60 - hours * 60)
-                    expdone_time = datetime.datetime.now() + datetime.timedelta(seconds=int(exp.remaining_time))
+                    hours = int(int(exp.remaining_time.total_seconds()) / 60 / 60)
+                    mins = int(int(exp.remaining_time.total_seconds()) / 60 - hours * 60)
+                    expdone_time = datetime.datetime.now() + exp.remaining_time
                     desc += f"{str(hours)} hr {str(mins)} min remaining ({expdone_time.strftime('%I:%M %p')})"
                 elif exp.status== 'Finished':
                     desc += ":white_check_mark: " + exp.status
