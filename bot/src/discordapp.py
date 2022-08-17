@@ -259,7 +259,7 @@ async def notes(ctx, name=None):
 
             # realm currency section
             if int(notes.remaining_realm_currency_recovery_time.total_seconds()) == 0:
-                desc += "<:realmcurrency:948030718087405598>Your teapot currency is probably full."
+                desc += "<:realmcurrency:948030718087405598>**Your teapot currency is probably full.**"
             else:
                 desc += "<:realmcurrency:948030718087405598>" + str(notes.current_realm_currency) + "/" + str(notes.max_realm_currency) 
 
@@ -270,7 +270,7 @@ async def notes(ctx, name=None):
             # parametric transformer
             desc += "\n<:parametric:971723428543479849> "
             if int(notes.remaining_transformer_recovery_time.total_seconds()) == 0:
-                desc += "Ready to use!"
+                desc += "**Ready to use!**"
             else:
                 epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
                 desc +="<t:" + str(epoch_time) + ":R>"
@@ -293,7 +293,9 @@ async def notes(ctx, name=None):
                     description=desc,
                     colour=nextcord.Colour.brand_green(),
                     )
-            await ctx.reply(embed=embed)
+            msg = await ctx.reply(embed=embed)
+            if int(notes.remaining_resin_recovery_time.total_seconds()) == 0:
+                await msg.add_reaction("<:KleeDerp:861458796772589608>")
         except gs.errors.DataNotPublic:
             embed = nextcord.Embed(
                     title="Notes for " + user['name'],
