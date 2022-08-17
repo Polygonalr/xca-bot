@@ -10,12 +10,7 @@ import sys
 import datetime
 import time
 from configFile import token, owner_id, channel_whitelist
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-import base64
+from enka import get_file_content_chrome, extract_enka_image
 
 bot = commands.Bot(command_prefix='$')
 bot.remove_command('help')
@@ -26,9 +21,7 @@ with open(os.path.join(__location__, '../../cookies.json')) as f:
     data = json.load(f)
 
 def restrict_channel(ctx):
-    if isinstance(ctx.channel, nextcord.channel.DMChannel) or (len(channel_whitelist()) == 0 or ctx.channel.name in channel_whitelist()):
-        return True
-    return False
+    return isinstance(ctx.channel, nextcord.channel.DMChannel) or (len(channel_whitelist()) == 0 or ctx.channel.name in channel_whitelist())
 
 @bot.event
 async def on_ready():
@@ -266,7 +259,7 @@ async def notes(ctx, name=None):
 
             # realm currency section
             if int(notes.remaining_realm_currency_recovery_time.total_seconds()) == 0:
-                desc += "<:realmcurrency:948030718087405598>Your teapot currency is probably full."
+                desc += "<:realmcurrency:948030718087405598>**Your teapot currency is probably full.**"
             else:
                 desc += "<:realmcurrency:948030718087405598>" + str(notes.current_realm_currency) + "/" + str(notes.max_realm_currency) 
 
@@ -277,7 +270,7 @@ async def notes(ctx, name=None):
             # parametric transformer
             desc += "\n<:parametric:971723428543479849> "
             if int(notes.remaining_transformer_recovery_time.total_seconds()) == 0:
-                desc += "Ready to use!"
+                desc += "**Ready to use!**"
             else:
                 epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
                 desc +="<t:" + str(epoch_time) + ":R>"
@@ -300,7 +293,9 @@ async def notes(ctx, name=None):
                     description=desc,
                     colour=nextcord.Colour.brand_green(),
                     )
-            await ctx.reply(embed=embed)
+            msg = await ctx.reply(embed=embed)
+            if int(notes.remaining_resin_recovery_time.total_seconds()) == 0:
+                await msg.add_reaction("<:KleeDerp:861458796772589608>")
         except gs.errors.DataNotPublic:
             embed = nextcord.Embed(
                     title="Notes for " + user['name'],
@@ -324,7 +319,8 @@ async def notes(ctx, name=None):
                 )
         await ctx.reply(embed=embed)
 
-@bot.command(description="Shows enka.shinshin link for a user.")
+# Thanks shinshin.moe for the API!
+@bot.command(description="Shows enka.shinshin link for a user, or extracts the enka character card for the specified character.")
 async def enka(ctx, name=None, char=None):
     # Just restriction checking and arguments wrangling
     if not restrict_channel(ctx):
@@ -353,7 +349,14 @@ async def enka(ctx, name=None, char=None):
                     )
             await ctx.reply(embed=embed)
             img_bytes = extract_enka_image(user['uid'], char)
-            if img_bytes == "no":
+            if img_bytes == "priv":
+                embed = nextcord.Embed(
+                title="Error: Private Profile",
+                description="Please enable the 'Show Character Details' option in your Character Showcase in-game to see the details.",
+                colour=nextcord.Colour.brand_red(),
+                )
+                await ctx.reply(embed=embed)
+            elif img_bytes == "no":
                 embed = nextcord.Embed(
                 description=f'Error: Char not found: {char}',
                 colour=nextcord.Colour.brand_red(),
@@ -368,55 +371,31 @@ async def enka(ctx, name=None, char=None):
                 )
         await ctx.reply(embed=embed)
 
-# Thanks to https://stackoverflow.com/questions/47424245/how-to-download-an-image-with-python-3-selenium-if-the-url-begins-with-blob
-def get_file_content_chrome(driver, uri):
-  result = driver.execute_async_script("""
-    var uri = arguments[0];
-    var callback = arguments[1];
-    var toBase64 = function(buffer){for(var r,n=new Uint8Array(buffer),t=n.length,a=new Uint8Array(4*Math.ceil(t/3)),i=new Uint8Array(64),o=0,c=0;64>c;++c)i[c]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(c);for(c=0;t-t%3>c;c+=3,o+=4)r=n[c]<<16|n[c+1]<<8|n[c+2],a[o]=i[r>>18],a[o+1]=i[r>>12&63],a[o+2]=i[r>>6&63],a[o+3]=i[63&r];return t%3===1?(r=n[t-1],a[o]=i[r>>2],a[o+1]=i[r<<4&63],a[o+2]=61,a[o+3]=61):t%3===2&&(r=(n[t-2]<<8)+n[t-1],a[o]=i[r>>10],a[o+1]=i[r>>4&63],a[o+2]=i[r<<2&63],a[o+3]=61),new TextDecoder("ascii").decode(a)};
-    var xhr = new XMLHttpRequest();
-    xhr.responseType = 'arraybuffer';
-    xhr.onload = function(){ callback(toBase64(xhr.response)) };
-    xhr.onerror = function(){ callback(xhr.status) };
-    xhr.open('GET', uri);
-    xhr.send();
-    """, uri)
-  if type(result) == int :
-    raise Exception("Request failed with status %s" % result)
-  return base64.b64decode(result)
+@bot.command(description="Shows Summertime Odyssey 2022 progress.")
+async def summer(ctx, name=None):
+        # Just restriction checking and arguments wrangling
+    if not restrict_channel(ctx):
+        return
+    if name == None:
+        user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
+    else:
+        user = next((acc for acc in data if acc['name'] == name), None)
 
-def extract_enka_image(uid, char):
-    # Initialize the browser
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get("https://enka.shinshin.moe/u/" + str(uid))
-    WebDriverWait(driver, 30).until( # Wait for the page to load!
-        EC.presence_of_element_located((By.CLASS_NAME, "name"))
-    )
-
-    # Finding the character
-    found = False
-    char_list = driver.find_elements(by=By.CLASS_NAME, value="CharacterList")[0].find_elements(by=By.CLASS_NAME, value="avatar")
-    for char_icon in char_list:
-        char_icon.click()
-        char_name = driver.find_elements(by=By.CLASS_NAME, value="name")[0].get_attribute('innerHTML')
-        if char.lower() in char_name.lower():
-            found = True
-            break
-    if not found:
-        driver.quit()
-        return "no"
-
-    driver.find_elements(by=By.CLASS_NAME, value="toolbar")[0].find_elements(by=By.TAG_NAME, value="button")[0].click()
-    img_blob = WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'UID ')]/img"))
-    )
-    img_data = get_file_content_chrome(driver, img_blob.get_attribute('src'))
-    driver.quit()
-    return img_data
+    if user != None:
+        client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
+        summer_stats = (await client.get_genshin_activities(user['uid'])).summertime_odyssey
+        embed = nextcord.Embed(
+                title="Summer Odyssey 2022 stats for " + user['name'],
+                description=(f"<:treasurechest:1003168924856242238>: {summer_stats.treasure_chests}/182"),
+                colour=nextcord.Colour.brand_green(),
+                )
+        await ctx.reply(embed=embed)
+    else:
+        embed = nextcord.Embed(
+                description=f'Error: User not found: {name}',
+                colour=nextcord.Colour.brand_red(),
+                )
+        await ctx.reply(embed=embed)
 
 async def get_notes(user):
     client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
