@@ -369,6 +369,32 @@ async def enka(ctx, name=None, char=None):
                 )
         await ctx.reply(embed=embed)
 
+@bot.command(description="Shows Summertime Odyssey 2022 progress.")
+async def summer(ctx, name=None):
+        # Just restriction checking and arguments wrangling
+    if not restrict_channel(ctx):
+        return
+    if name == None:
+        user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
+    else:
+        user = next((acc for acc in data if acc['name'] == name), None)
+
+    if user != None:
+        client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
+        summer_stats = (await client.get_genshin_activities(user['uid'])).summertime_odyssey
+        embed = nextcord.Embed(
+                title="Summer Odyssey 2022 stats for " + user['name'],
+                description=(f"<:treasurechest:1003168924856242238>: {summer_stats.treasure_chests}/182"),
+                colour=nextcord.Colour.brand_green(),
+                )
+        await ctx.reply(embed=embed)
+    else:
+        embed = nextcord.Embed(
+                description=f'Error: User not found: {name}',
+                colour=nextcord.Colour.brand_red(),
+                )
+        await ctx.reply(embed=embed)
+
 async def get_notes(user):
     client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
     notes = await client.get_genshin_notes(uid=user['uid'])
