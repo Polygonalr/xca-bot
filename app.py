@@ -3,6 +3,7 @@ import asyncio
 import time
 import datetime
 import json
+import sys
 import genshin as gs
 
 __location__ = os.path.realpath(
@@ -22,6 +23,9 @@ async def check_everyone_in():
             logs.write("Successfully signed in for {}".format(acc["name"]) + "\n")
         except gs.AlreadyClaimed:
             logs.write("{} has already claimed the reward!".format(acc["name"]) + "\n")
+        except:
+            e = sys.exc_info()
+            logs.write("{}: {}\n".format(acc["name"], str(e[0])))
         if not i == len(data) - 1:
             logs.write("Waiting for 10 seconds before next sign-in" + "\n")
             time.sleep(10)
