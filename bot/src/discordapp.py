@@ -228,6 +228,52 @@ async def abyss(ctx, name=None, prev=None):
             embed.add_field(name=not_found_msg, value='\u200b')
         await ctx.reply(embed=embed)
 
+@bot.command(aliases=['ex'], description="Shows your exploration progress in Teyvat.")
+async def exploration(ctx):
+    if not restrict_channel(ctx):
+        return
+    await ctx.reply("Command unimplemented.")
+
+@bot.command(description="Recaps previous abyss cycle characters used.")
+async def abyssrecap(ctx, name=None):
+    floors_to_recap = [9, 10, 11]
+    if not restrict_channel(ctx):
+        return
+    if name == None:
+        user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
+    else:
+        user = next((acc for acc in data if acc['name'] == name), None)
+    if user == None:
+        not_found_msg = f"Cannot find user {user['name']}."
+        embed = nextcord.Embed(
+                title=not_found_msg,
+                colour=nextcord.Colour.brand_red()
+                )
+        await ctx.reply(embed=embed)
+        return
+
+    # Retrieve abyss data and print out recap
+    spiral_abyss = await get_abyss(user, True)
+    embed = nextcord.Embed(
+            title=f"Showing abyss recap for {user['name']}",
+            colour=nextcord.Colour.brand_green(),
+            )
+    for floor_to_recap in floors_to_recap:
+        current_floor = next((floor for floor in spiral_abyss.floors if floor.floor == floor_to_recap), None)
+        if current_floor == None: continue
+        embed.add_field(name=f"Characters used for floor {floor_to_recap} chamber 1", value='\u200b', inline=False)
+        firsthalf = ""
+        secondhalf = ""
+        first_chamber = current_floor.chambers[0]
+        battles = first_chamber.battles
+        for chars in battles[0].characters:
+            firsthalf += chars.name + "\n"
+        for chars in battles[1].characters:
+            secondhalf += chars.name + "\n"
+        embed.add_field(name='1st half', value=firsthalf)
+        embed.add_field(name='2nd half', value=secondhalf)
+    await ctx.reply(embed=embed)
+
 @bot.command(description="Don't shout. Alias for $notes.")
 async def RE(ctx):
     if not restrict_channel(ctx):
@@ -342,6 +388,8 @@ async def enka(ctx, name=None, char=None):
                     )
             await ctx.reply(embed=embed)
         else:
+            await ctx.reply("Command disabled.")
+            return
             embed = nextcord.Embed(
                     title=f'Extracting Enka card for {user["name"]}\'s {char}...',
                     description="My server is slow, this command will take awhile. Please be patient!",
