@@ -180,12 +180,15 @@ async def abyss(ctx, name=None, prev=None):
     if not restrict_channel(ctx):
         return
     prevFlag = False
-    if name == None or name == "prev":
+    if name == None or name == "prev" or name == "recap":
         user = next((acc for acc in data if acc['discord_id'] == ctx.author.id), None)
     else:
         user = next((acc for acc in data if acc['name'] == name), None)
     if name == "prev" or prev == "prev":
         prevFlag = True
+    if name == "recap":
+        await abyssrecap(ctx)
+        return
     if user != None:
         spiral_abyss = await get_abyss(user, prevFlag)
         desc = "Total battles: {}\nTotal wins: {}\nMax floor: {}\nTotal stars: {}\n"\
@@ -236,7 +239,7 @@ async def exploration(ctx):
 
 @bot.command(description="Recaps previous abyss cycle characters used.")
 async def abyssrecap(ctx, name=None):
-    floors_to_recap = [9, 10, 11]
+    floors_to_recap = [9, 10, 11, 12]
     if not restrict_channel(ctx):
         return
     if name == None:
