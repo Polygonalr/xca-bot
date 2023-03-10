@@ -6,11 +6,15 @@
 
 * Python 3.9
 
-* [genshin.py](https://github.com/thesadru/genshin.py) and [nextcord](https://github.com/nextcord/nextcord) installed in your python env.
-
-* Optionally for the Enka module (thanks [shinshin.moe](https://shinshin.moe/)!), configure [Selenium](https://pypi.org/project/selenium/) with chromedriver. Geckodriver works too, but you'll have to tweak `bot/src/enka.py` to use it.
-
 ## Deployment
+
+First, install the required pip modules.
+
+```
+pip install -r requirements.txt
+```
+
+Then, setup your config file and cookies.
 
 ```
 cp ./bot/src/configFile.py.example ./bot/src/configFile.py && cp ./bot/src/cookies.json.example ./bot/src/cookies.json

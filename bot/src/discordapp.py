@@ -10,7 +10,6 @@ import sys
 import datetime
 import time
 from configFile import token, owner_id, channel_whitelist
-from enka import get_file_content_chrome, extract_enka_image
 
 bot = commands.Bot(command_prefix='$')
 bot.remove_command('help')
@@ -37,7 +36,16 @@ async def on_message(ctx):
                 await ctx.reply("`" + ctx.stickers[0].url + "`")
             else:
                 await ctx.reply("`" + ctx.content + "`")
+    elif restrict_channel(ctx):
+        await check_spiral_abyss_reset(ctx)
     await bot.process_commands(ctx)
+
+async def check_spiral_abyss_reset(ctx):
+    # check whether it's 1st or 16th of the month
+    todayDate = datetime.date.today()
+    if todayDate.day in [1, 16]:
+        if "today?" in ctx.content or "reset" in ctx.content:
+            await ctx.reply("YES IT IS TODAY")
 
 @bot.command(description="Get some help.")
 async def help(ctx):
@@ -393,28 +401,6 @@ async def enka(ctx, name=None, char=None):
         else:
             await ctx.reply("Command disabled.")
             return
-            embed = nextcord.Embed(
-                    title=f'Extracting Enka card for {user["name"]}\'s {char}...',
-                    description="My server is slow, this command will take awhile. Please be patient!",
-                    colour=nextcord.Colour.orange()
-                    )
-            await ctx.reply(embed=embed)
-            img_bytes = extract_enka_image(user['uid'], char)
-            if img_bytes == "priv":
-                embed = nextcord.Embed(
-                title="Error: Private Profile",
-                description="Please enable the 'Show Character Details' option in your Character Showcase in-game to see the details.",
-                colour=nextcord.Colour.brand_red(),
-                )
-                await ctx.reply(embed=embed)
-            elif img_bytes == "no":
-                embed = nextcord.Embed(
-                description=f'Error: Char not found: {char}',
-                colour=nextcord.Colour.brand_red(),
-                )
-                await ctx.reply(embed=embed)
-            else:
-                await ctx.send(file=nextcord.File(fp=BytesIO(img_bytes), filename='image.png'))
     else:
         embed = nextcord.Embed(
                 description=f'Error: User not found: {name}',
@@ -422,9 +408,9 @@ async def enka(ctx, name=None, char=None):
                 )
         await ctx.reply(embed=embed)
 
-@bot.command(description="Shows Summertime Odyssey 2022 progress.")
-async def summer(ctx, name=None):
-        # Just restriction checking and arguments wrangling
+@bot.command(description="Shows characters owned on that account.")
+async def characters(ctx, name=None):
+    # Just restriction checking and arguments wrangling
     if not restrict_channel(ctx):
         return
     if name == None:
@@ -434,12 +420,22 @@ async def summer(ctx, name=None):
 
     if user != None:
         client = gs.Client({"ltuid": user['ltuid'], "ltoken": user['ltoken']})
-        summer_stats = (await client.get_genshin_activities(user['uid'])).summertime_odyssey
+        characters = (await client.get_genshin_user(user['uid'])).characters
+        char_names = ""
+        levels = ""
+        consts = ""
+        for char in characters:
+            char_names += char.name + '\n'
+            levels += str(char.level) + '\n'
+            consts += str(char.constellation) + '\n'
         embed = nextcord.Embed(
-                title="Summer Odyssey 2022 stats for " + user['name'],
-                description=(f"<:treasurechest:1003168924856242238>: {summer_stats.treasure_chests}/182"),
+                title="Displaying characters owned by " + user['name'],
+                description="",
                 colour=nextcord.Colour.brand_green(),
                 )
+        embed.add_field(name="Name", value=char_names)
+        embed.add_field(name="Level", value=levels)
+        embed.add_field(name="C", value=consts)
         await ctx.reply(embed=embed)
     else:
         embed = nextcord.Embed(
