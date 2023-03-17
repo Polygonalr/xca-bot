@@ -43,9 +43,11 @@ async def on_message(ctx):
 async def check_spiral_abyss_reset(ctx):
     # check whether it's 1st or 16th of the month
     todayDate = datetime.date.today()
-    if todayDate.day in [1, 16]:
-        if "today?" in ctx.content or "reset" in ctx.content:
+    if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
+        if todayDate.day in [1, 16]:
             await ctx.reply("YES IT IS TODAY")
+        else:
+            await ctx.reply("NO, STOP ASKING")
 
 @bot.command(description="Get some help.")
 async def help(ctx):
