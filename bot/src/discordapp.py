@@ -205,17 +205,16 @@ async def abyss(ctx, name=None, prev=None):
             .format(spiral_abyss.total_battles, spiral_abyss.total_wins, spiral_abyss.max_floor, spiral_abyss.total_stars)
 
         floors = spiral_abyss.floors
+        floor_9 = next((floor for floor in floors if floor.floor == 9), None)
         floor_12 = next((floor for floor in floors if floor.floor == 12), None)
         if prevFlag:
             embed = nextcord.Embed(
                     title="Previous cycle abyss stats for " + user['name'],
-                    description=desc,
                     colour=nextcord.Colour.brand_green(),
                     )
         else:
             embed = nextcord.Embed(
                     title="Abyss stats for " + user['name'],
-                    description=desc,
                     colour=nextcord.Colour.brand_green(),
                     )
         if floor_12 != None:
@@ -236,9 +235,16 @@ async def abyss(ctx, name=None, prev=None):
             embed.add_field(name='1st half', value=firsthalf)
             embed.add_field(name='2nd half', value=secondhalf)
             embed.add_field(name='Stars', value=stars)
+
+            # calculate time taken between 9-1 and 12-3
+            if len(floor_12.chambers) == 3:
+                time_taken = floor_12.chambers[2].battles[1].timestamp - floor_9.chambers[0].battles[0].timestamp
+                desc += "Time taken between 9-1 and 12-3: " + str(time_taken) + "\n"
         else:
             not_found_msg = f"{user['name']} has not attempted floor 12 yet!"
             embed.add_field(name=not_found_msg, value='\u200b')
+
+        embed.description = desc
         await ctx.reply(embed=embed)
 
 @bot.command(aliases=['ex'], description="Shows your exploration progress in Teyvat.")
