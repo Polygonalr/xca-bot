@@ -238,8 +238,11 @@ async def abyss(ctx, name=None, prev=None):
 
             # calculate time taken between 9-1 and 12-3
             if len(floor_12.chambers) == 3:
-                time_taken = floor_12.chambers[2].battles[1].timestamp - floor_9.chambers[0].battles[0].timestamp
-                desc += "Time taken between 9-1 and 12-3: " + str(time_taken) + "\n"
+                if floor_9.chambers[0].battles[0].timestamp < floor_12.chambers[2].battles[1].timestamp:
+                    time_taken = floor_12.chambers[2].battles[1].timestamp - floor_9.chambers[0].battles[0].timestamp
+                    desc += "Time taken between 9-1 and 12-3: " + str(time_taken) + "\n"
+                else:
+                    desc += "Time taken between 9-1 and 12-3 cannot be estimated.\n"
         else:
             not_found_msg = f"{user['name']} has not attempted floor 12 yet!"
             embed.add_field(name=not_found_msg, value='\u200b')
