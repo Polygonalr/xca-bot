@@ -12,12 +12,14 @@ __location__ = os.path.realpath(
 with open(os.path.join(__location__, 'cookies.json')) as f:
     data = json.load(f)
 
-
 async def check_everyone_in():
     logs = open("checkin-log.txt", "w")
     logs.write("Checking in! " + datetime.datetime.now().isoformat() + "\n")
     for i, acc in enumerate(data):
-        client = gs.Client({"ltuid": acc['ltuid'], "ltoken": acc['ltoken']}, game=gs.Game.GENSHIN)
+        if acc['type'] == 'G': 
+            client = gs.Client({"ltuid": acc['ltuid'], "ltoken": acc['ltoken']}, game=gs.Game.GENSHIN)
+        elif acc['type'] == 'S':
+            client = gs.Client({"ltuid": acc['ltuid'], "ltoken": acc['ltoken']}, game=gs.Game.STARRAIL)
         try:
             await client.claim_daily_reward(reward=False)
             logs.write("Successfully signed in for {}".format(acc["name"]) + "\n")
