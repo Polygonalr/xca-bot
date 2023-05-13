@@ -43,9 +43,11 @@ async def on_message(ctx):
 async def check_spiral_abyss_reset(ctx):
     # check whether it's 1st or 16th of the month
     todayDate = datetime.date.today()
-    if todayDate.day in [1, 16]:
-        if "today?" in ctx.content or "reset" in ctx.content:
+    if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
+        if todayDate.day in [1, 16]:
             await ctx.reply("YES IT IS TODAY")
+        else:
+            await ctx.reply("NO, STOP ASKING")
 
 @bot.command(description="Get some help.")
 async def help(ctx):
@@ -199,7 +201,7 @@ async def abyss(ctx, name=None, prev=None):
         return
     if user != None:
         spiral_abyss = await get_abyss(user, prevFlag)
-        desc = "Total battles: {}\nTotal wins: {}\nMax floor: {}\nTotal stars: {}\n"\
+        desc = "Total battles: {} | Total wins: {}\nMax floor: {} | Total stars: {}\n"\
             .format(spiral_abyss.total_battles, spiral_abyss.total_wins, spiral_abyss.max_floor, spiral_abyss.total_stars)
 
         floors = spiral_abyss.floors
@@ -207,13 +209,11 @@ async def abyss(ctx, name=None, prev=None):
         if prevFlag:
             embed = nextcord.Embed(
                     title="Previous cycle abyss stats for " + user['name'],
-                    description=desc,
                     colour=nextcord.Colour.brand_green(),
                     )
         else:
             embed = nextcord.Embed(
                     title="Abyss stats for " + user['name'],
-                    description=desc,
                     colour=nextcord.Colour.brand_green(),
                     )
         if floor_12 != None:
@@ -234,9 +234,24 @@ async def abyss(ctx, name=None, prev=None):
             embed.add_field(name='1st half', value=firsthalf)
             embed.add_field(name='2nd half', value=secondhalf)
             embed.add_field(name='Stars', value=stars)
+
+            # calculate time taken between 9-1 and 12-3
+            if len(floor_12.chambers) == 3:
+                floor_9 = next((floor for floor in floors if floor.floor == 9), None)
+                floor_10 = next((floor for floor in floors if floor.floor == 10), None)
+                floor_11 = next((floor for floor in floors if floor.floor == 11), None)
+                if floor_9.chambers[0].battles[0].timestamp < floor_10.chambers[0].battles[0].timestamp and \
+                    floor_10.chambers[0].battles[0].timestamp < floor_11.chambers[0].battles[0].timestamp and \
+                    floor_11.chambers[0].battles[0].timestamp < floor_12.chambers[0].battles[0].timestamp:
+                    time_taken = floor_12.chambers[2].battles[1].timestamp - floor_9.chambers[0].battles[0].timestamp
+                    desc += "Time taken between 9-1 and 12-3: " + str(time_taken) + "\n"
+                else:
+                    desc += f"{user['name']} did not complete floors 9 to 12. Time taken to clear spiral abyss cannot be estimated."
         else:
             not_found_msg = f"{user['name']} has not attempted floor 12 yet!"
             embed.add_field(name=not_found_msg, value='\u200b')
+
+        embed.description = desc
         await ctx.reply(embed=embed)
 
 @bot.command(aliases=['ex'], description="Shows your exploration progress in Teyvat.")
@@ -465,7 +480,7 @@ async def redeem_code(code):
                 "name": acc['name'],
                 "status": "Not attempted",
             }
-            client = gs.Client({"ltuid": acc['ltuid'], "ltoken": acc['ltoken'], "account_id": acc['ltuid'], "cookie_token": acc['cookie_token']})
+            client = gs.Client({"ltuid": acc['ltuid'], "ltoken": acc['ltoken'], "account_id": acc['ltuid'], "cookie_token": acc['cookie_token']}, game=gs.Game.GENSHIN)
             try:
                 await client.redeem_code(code, uid=acc['uid'])
             except gs.GenshinException as e:
