@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -27,21 +27,22 @@ class HoyolabAccount(Base):
     ltoken = Column(String)
     cookie_token = Column(String, nullable=True)
 
-    is_starrail = Column(Boolean, default=False)
-    is_genshin = Column(Boolean, default=False)
+    starrail_uid = Column(Integer, nullable=True)
+    genshin_uid = Column(Integer, nullable=True)
 
     discord_user_id = Column(Integer, ForeignKey("discord_users.id"))
     discord_user = relationship("DiscordUser", back_populates="hoyolab_accounts")
 
-    def __init__(self, name: str, ltuid: int, ltoken: str, cookie_token: str, discord_user_id: int, is_starrail: bool = False, is_genshin: bool = False):
+    def __init__(self, name: str, ltuid: int, ltoken: str, cookie_token: str, discord_user_id: int, starrail_uid: int = None, genshin_uid: int = None):
         self.name = name
         self.ltuid = ltuid
         self.ltoken = ltoken
         self.cookie_token = cookie_token
         self.discord_user_id = discord_user_id
         self.is_disabled = False
-        self.is_starrail = is_starrail
-        self.is_genshin = is_genshin
+        self.starrail_uid = starrail_uid
+        self.genshin_uid = genshin_uid
+
 
     def __repr__(self):
         return f"<HoyolabAccount {self.id} {self.name}>"
