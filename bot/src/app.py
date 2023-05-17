@@ -32,6 +32,7 @@ def launch():
             return
 
         print(f"Message from {ctx.author}: {ctx.content}")
+        await bot.process_commands(ctx)
 
     for cogs in all_cogs:
         bot.add_cog(cogs(bot))
