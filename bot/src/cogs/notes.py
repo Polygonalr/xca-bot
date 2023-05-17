@@ -1,4 +1,5 @@
 import datetime
+import time
 import genshin as gs
 from nextcord import Embed, Colour
 from nextcord.ext import commands
@@ -50,20 +51,41 @@ class Notes(commands.Cog):
 
             # Real Currency
             if int(notes.remaining_realm_currency_recovery_time.total_seconds()) == 0:
-                desc += f"{REALM_CURRENCY}**Your teapot currency is probably full.**\n"
+                desc += f"{REALM_CURRENCY} **Your teapot currency is probably full.**\n"
             else:
-                desc += f"{REALM_CURRENCY}{notes.current_realm_currency}/{notes.max_realm_currency}\n"
+                desc += f"{REALM_CURRENCY} {notes.current_realm_currency}/{notes.max_realm_currency}\n"
             
             # Parametric Transformer
             if int(notes.remaining_transformer_recovery_time.total_seconds()) == 0:
-                desc += f"{PARAMETRIC}**Ready to use!**"
+                desc += f"{PARAMETRIC} **Ready to use!**"
             else:
                 epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
-                desc += f"{PARAMETRIC}<t:{epoch_time}:R>"
+                desc += f"{PARAMETRIC} <t:{epoch_time}:R>"
+
+            # Expeditions
+            desc += "\n\n**Expeditions**\n"
+            for idx, exp in enumerate(notes.expeditions):
+                desc += f"{idx + 1}. "
+                if exp.status == 'Ongoing':
+                    hours = int(int(exp.remaining_time.total_seconds()) / 60 / 60)
+                    mins = int(int(exp.remaining_time.total_seconds()) / 60 - hours * 60)
+                    expdone_time = datetime.datetime.now() + exp.remaining_time
+                    desc += f"{str(hours)} hr {str(mins)} min remaining ({expdone_time.strftime('%I:%M %p')})"
+                elif exp.status== 'Finished':
+                    desc += ":white_check_mark: " + exp.status
+                else:
+                    desc += exp.status
+                desc += "\n"
+            embed = Embed(
+                    title="Notes for " + account.name,
+                    description=desc,
+                    colour=Colour.brand_green(),
+                    )
+            await ctx.reply(embed=embed)
 
         except gs.errors.DataNotPublic:
             embed = Embed(
-                    title="Notes for " + account['name'],
+                    title="Notes for " + account.name,
                     description="[Error: Account did not enable Real-Time Notes. Click here to do so.](https://webstatic-sea.mihoyo.com/app/community-game-records-sea/index.html?#/ys/set)",
                     colour=Colour.brand_red(),
                     )
@@ -78,7 +100,7 @@ class Notes(commands.Cog):
                     )
             await ctx.reply(embed=embed)
         
-    async def get_notes(account):
-        client = gs.Client({"ltuid": account['ltuid'], "ltoken": account['ltoken']})
-        notes = await client.get_genshin_notes(uid=account['genshin_uid'])
+    async def get_notes(self, account):
+        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        notes = await client.get_genshin_notes(uid=account.genshin_uid)
         return notes
