@@ -1,3 +1,4 @@
+import datetime
 import genshin as gs
 from nextcord import Embed, Colour
 from nextcord.ext import commands
@@ -36,8 +37,29 @@ class Notes(commands.Cog):
 
         try:
             notes = await self.get_notes(account)
+
+            # Resin
             desc = f"{RESIN} {notes.current_resin}/160"
-            # TODO continue porting
+            if int(notes.remaining_resin_recovery_time.total_seconds()) == 0:
+                desc += KLEE_DERP
+            else:
+                maxout_time = datetime.datetime.now() + notes.remaining_resin_recovery_time
+                desc += maxout_time.strftime("(Maxout - %I:%M %p)")
+            
+            desc += "\n"
+
+            # Real Currency
+            if int(notes.remaining_realm_currency_recovery_time.total_seconds()) == 0:
+                desc += f"{REALM_CURRENCY}**Your teapot currency is probably full.**\n"
+            else:
+                desc += f"{REALM_CURRENCY}{notes.current_realm_currency}/{notes.max_realm_currency}\n"
+            
+            # Parametric Transformer
+            if int(notes.remaining_transformer_recovery_time.total_seconds()) == 0:
+                desc += f"{PARAMETRIC}**Ready to use!**"
+            else:
+                epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
+                desc += f"{PARAMETRIC}<t:{epoch_time}:R>"
 
         except gs.errors.DataNotPublic:
             embed = Embed(
@@ -55,3 +77,8 @@ class Notes(commands.Cog):
                     colour=Colour.brand_red(),
                     )
             await ctx.reply(embed=embed)
+        
+    async def get_notes(account):
+        client = gs.Client({"ltuid": account['ltuid'], "ltoken": account['ltoken']})
+        notes = await client.get_genshin_notes(uid=account['genshin_uid'])
+        return notes
