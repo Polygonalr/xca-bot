@@ -38,3 +38,7 @@ def get_genshin_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
 def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.name == name).all()
+
+def get_account_by_name(name: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.name == name).first()
