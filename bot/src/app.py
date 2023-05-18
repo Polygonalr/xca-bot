@@ -9,7 +9,7 @@ from database import init_db
 
 config = dotenv_values(".env")
 
-"""Create bot object"""
+'''Create bot object'''
 intents = nextcord.Intents.default()
 intents.message_content = True
 intents.typing = False

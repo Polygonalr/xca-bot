@@ -7,7 +7,7 @@ from nextcord.ext.commands import Bot, Context
 import traceback
 from util import get_accounts_by_discord_id, get_accounts_by_name
 
-"""All emotes used in this cog."""
+'''All emotes used in this cog.'''
 RESIN = "<:resin:927403591818420265>"
 KLEE_DERP = "<:KleeDerp:861458796772589608>"
 REALM_CURRENCY = "<:realmcurrency:948030718087405598>"

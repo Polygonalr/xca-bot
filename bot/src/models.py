@@ -3,11 +3,11 @@ from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
-"""Model which represents a Discord user"""
+'''Model which represents a Discord user'''
 class DiscordUser(Base):
     __tablename__ = "discord_users"
 
-    """Discord user ID"""
+    '''Discord user ID'''
     id = Column(Integer, primary_key=True, autoincrement=False)
     hoyolab_accounts = relationship("HoyolabAccount", back_populates="discord_user")
 
@@ -17,7 +17,7 @@ class DiscordUser(Base):
     def __repr__(self):
         return f"<DiscordUser {self.id}>"
 
-"""Model which represents a Hoyolab account"""
+'''Model which represents a Hoyolab account'''
 class HoyolabAccount(Base):
     __tablename__ = "hoyolab_accounts"
 
@@ -48,7 +48,7 @@ class HoyolabAccount(Base):
         return f"<HoyolabAccount {self.id} {self.name}>"
 
 
-"""For tracking genshin codes redeemed through the bot"""
+'''For tracking genshin codes redeemed through the bot'''
 class RedeemedGenshinCode(Base):
     __tablename__ = "redeemed_genshin_codes"
     id = Column(Integer, primary_key=True)
@@ -60,7 +60,7 @@ class RedeemedGenshinCode(Base):
     def __repr__(self):
         return f"<RedeemedGenshinCode {self.id} {self.code}>"
 
-"""For tracking star rail codes redeemed through the bot"""
+'''For tracking star rail codes redeemed through the bot'''
 class RedeemedStarRailCode(Base):
     __tablename__ = "redeemed_starrail_codes"
     id = Column(Integer, primary_key=True)

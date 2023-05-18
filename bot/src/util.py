@@ -24,6 +24,17 @@ def get_accounts_by_discord_id(discord_id: int) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.discord_user_id == discord_id).all()
 
+'''Below 2 functions are written on the assumption that every user has only 1 genshin account'''
+def get_genshin_acc_by_name(name: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.name == name) \
+        .filter(HoyolabAccount.genshin_uid != None).first()
+
+def get_genshin_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.discord_user_id == discord_id) \
+        .filter(HoyolabAccount.genshin_uid != None).first()
+
 def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.name == name).all()
