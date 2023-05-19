@@ -1,4 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+import enum
+from genshin import Game
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, TIMESTAMP
+from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -32,6 +35,7 @@ class HoyolabAccount(Base):
 
     discord_user_id = Column(Integer, ForeignKey("discord_users.id"))
     discord_user = relationship("DiscordUser", back_populates="hoyolab_accounts")
+    daily_checkin_status = relationship("DailyCheckInStatus", back_populates="account")
 
     def __init__(self, name: str, ltuid: int, ltoken: str, cookie_token: str, discord_user_id: int, starrail_uid: int = None, genshin_uid: int = None):
         self.name = name
@@ -46,6 +50,29 @@ class HoyolabAccount(Base):
 
     def __repr__(self):
         return f"<HoyolabAccount {self.id} {self.name}>"
+    
+class CheckInStatus(enum.Enum):
+    success = 1
+    failed = 2
+    claimed = 3
+    unknown = 4
+
+'''For storing daily check-in status of each account'''
+class DailyCheckInStatus(Base):
+    __tablename__ = "daily_checkin_status"
+    account_id = Column(Integer, ForeignKey("hoyolab_accounts.id"), primary_key=True)
+    game_type = Column(Enum(Game), primary_key=True)
+    status = Column(Enum(CheckInStatus), name="daily_checkin_status_enum", nullable=False)
+    last_update = Column(TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())
+    account = relationship("HoyolabAccount", back_populates="daily_checkin_status")
+
+    def __init__(self, account_id: int, game_type: Game, status: CheckInStatus):
+        self.account_id = account_id
+        self.game_type = game_type
+        self.status = status
+    
+    def __repr__(self):
+        return f"<DailyCheckInStatus {self.account_id} {self.game_type} {self.status}>"
 
 
 '''For tracking genshin codes redeemed through the bot'''

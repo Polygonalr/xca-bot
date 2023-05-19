@@ -14,21 +14,21 @@ def check_starrail_redeemed_code(code: str) -> bool:
 
 def get_all_genshin_accounts() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.genshin_uid is not None).all()
+        .filter(HoyolabAccount.genshin_uid.is_not(None)).all()
 
 def get_all_starrail_accounts() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.starrail_uid is not None).all()
+        .filter(HoyolabAccount.starrail_uid.is_not(None)).all()
 
 def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.genshin_uid is not None,
-                HoyolabAccount.cookie_token is not None).all()
+        .filter(HoyolabAccount.genshin_uid.is_not(None),
+                HoyolabAccount.cookie_token.is_not(None)).all()
 
 def get_all_starrail_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.starrail_uid is not None,
-                HoyolabAccount.cookie_token is not None).all()
+        .filter(HoyolabAccount.starrail_uid.is_not(None),
+                HoyolabAccount.cookie_token.is_not(None)).all()
 
 def get_accounts_by_discord_id(discord_id: int) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
