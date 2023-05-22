@@ -12,6 +12,7 @@ RESIN = "<:resin:927403591818420265>"
 KLEE_DERP = "<:KleeDerp:861458796772589608>"
 REALM_CURRENCY = "<:realmcurrency:948030718087405598>"
 PARAMETRIC = "<:parametric:971723428543479849>"
+KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 
 class Notes(commands.Cog):
     def __init__(self, bot: Bot):
@@ -45,7 +46,7 @@ class Notes(commands.Cog):
                 desc += KLEE_DERP
             else:
                 maxout_time = datetime.datetime.now() + notes.remaining_resin_recovery_time
-                desc += maxout_time.strftime("(Maxout - %I:%M %p)")
+                desc += maxout_time.strftime(" (Maxout - %I:%M %p)")
             
             desc += "\n"
 
@@ -70,14 +71,14 @@ class Notes(commands.Cog):
                     hours = int(int(exp.remaining_time.total_seconds()) / 60 / 60)
                     mins = int(int(exp.remaining_time.total_seconds()) / 60 - hours * 60)
                     expdone_time = datetime.datetime.now() + exp.remaining_time
-                    desc += f"{str(hours)} hr {str(mins)} min remaining ({expdone_time.strftime('%I:%M %p')})"
+                    desc += f"{hours} hr {mins} min ({expdone_time.strftime('%I:%M %p')})"
                 elif exp.status== 'Finished':
                     desc += ":white_check_mark: " + exp.status
                 else:
                     desc += exp.status
                 desc += "\n"
             embed = Embed(
-                    title="Notes for " + account.name,
+                    title=f"{KIRARA_COOKIE} Notes for {account.name}",
                     description=desc,
                     colour=Colour.brand_green(),
                     )
