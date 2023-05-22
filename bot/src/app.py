@@ -14,7 +14,7 @@ intents = nextcord.Intents.default()
 intents.message_content = True
 intents.typing = False
 intents.presences = False
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 def launch():
     init_db()
