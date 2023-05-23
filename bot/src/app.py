@@ -6,6 +6,7 @@ import nextcord
 from nextcord.ext import commands
 
 from cogs import all_cogs
+from util import get_all_discord_ids
 from database import init_db
 
 config = dotenv_values(".env")
@@ -30,7 +31,7 @@ def launch():
     
     @bot.event
     async def on_message(ctx):
-        if ctx.author == bot.user:
+        if ctx.author == bot.user or ctx.author.id not in get_all_discord_ids():
             return
 
         print(f"Message from {ctx.author}: {ctx.content}")

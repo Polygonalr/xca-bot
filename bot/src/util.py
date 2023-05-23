@@ -1,8 +1,11 @@
-from models import HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode
+from models import DiscordUser, HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode
 from database import db_session
 from dotenv import dotenv_values
 
 config = dotenv_values(".env")
+
+def get_all_discord_ids() -> list[int]:
+    return db_session.query(DiscordUser.id).all()
 
 def check_genshin_redeemed_code(code: str) -> bool:
     return db_session.query(RedeemedGenshinCode) \
