@@ -4,6 +4,7 @@ from .notes import Notes
 from .abyss import Abyss
 from .redeem import Redeem
 from .help import Help
+from .list import List
 
 all_cogs = [
     Admin,
@@ -12,4 +13,5 @@ all_cogs = [
     Abyss,
     Redeem,
     Help,
+    List,
 ]
