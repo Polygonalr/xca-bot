@@ -175,7 +175,7 @@ class Redeem(commands.Cog):
                 "cookie_token": acc.cookie_token,
             }, game=gs.Game.STARRAIL)
             try:
-                await client.redeem_code(code, uid=acc['uid'])
+                await client.redeem_code(code, uid=acc.starrail_uid)
             except gs.GenshinException as e:
                 redemption_attempt['status'] = str(e)
             else:
