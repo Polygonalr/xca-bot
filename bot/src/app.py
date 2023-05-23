@@ -17,7 +17,7 @@ intents = nextcord.Intents.default()
 intents.message_content = True
 intents.typing = False
 intents.presences = False
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 def launch():
     init_db()
@@ -27,7 +27,7 @@ def launch():
     @bot.event
     async def on_ready():
         print(f'Logged in as {bot.user}')
-        await bot.change_presence(activity=nextcord.Activity(name="changes", type=nextcord.ActivityType.listening))
+        await bot.change_presence(activity=nextcord.Activity(name="for new orders", type=nextcord.ActivityType.watching))
     
     @bot.event
     async def on_message(ctx):
