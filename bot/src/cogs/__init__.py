@@ -3,6 +3,7 @@ from .ping import Ping
 from .notes import Notes
 from .abyss import Abyss
 from .redeem import Redeem
+from .help import Help
 
 all_cogs = [
     Admin,
@@ -10,4 +11,5 @@ all_cogs = [
     Notes,
     Abyss,
     Redeem,
+    Help,
 ]
