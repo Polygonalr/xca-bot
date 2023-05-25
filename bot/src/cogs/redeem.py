@@ -12,6 +12,7 @@ TIME_BETWEEN_REDEEMS = 2.5
 GENSHIN_REDEEM_LINK = "https://genshin.hoyoverse.com/en/gift?code="
 STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift"
 
+'''Cog which has commands to redeem codes for all accounts with cookie_token.'''
 class Redeem(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

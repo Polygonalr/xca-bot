@@ -2,6 +2,7 @@ from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 
+'''Cog for help command.'''
 class Help(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

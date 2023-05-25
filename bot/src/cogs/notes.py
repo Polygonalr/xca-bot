@@ -15,6 +15,7 @@ REALM_CURRENCY = "<:realmcurrency:948030718087405598>"
 PARAMETRIC = "<:parametric:971723428543479849>"
 KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 
+'''Cog with command that shows Real-time notes for Genshin.'''
 class Notes(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

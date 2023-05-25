@@ -8,6 +8,7 @@ from util import get_genshin_acc_by_discord_id, get_genshin_acc_by_name
 '''All emotes used in this cog'''
 ABYSS_STAR = "<:abyssstar:948380524462878760>"
 
+'''Cog which contains all commands for showing Spiral Abyss information.'''
 class Abyss(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

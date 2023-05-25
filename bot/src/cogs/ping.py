@@ -1,6 +1,7 @@
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 
+'''Cog for ping command.'''
 class Ping(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

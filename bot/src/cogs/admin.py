@@ -11,7 +11,7 @@ config = dotenv_values(".env")
 def is_owner(ctx: Context) -> bool:
     return ctx.author.id == int(config["OWNER_ID"])
 
-'''Class for all admin commands'''
+'''Cog for all admin commands.'''
 class Admin(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

@@ -3,6 +3,7 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 from util import get_all_genshin_accounts, get_all_starrail_accounts
 
+'''Cog with command to list down all Hoyolab accounts that the bot has access to.'''
 class List(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
