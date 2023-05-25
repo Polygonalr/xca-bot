@@ -1,8 +1,0 @@
-def token():
-    return ""
-
-def owner_id():
-    return 000000000000000000
-
-def channel_whitelist():
-    return ['coding-room', 'genshin-bot']
