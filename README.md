@@ -1,5 +1,5 @@
 <h1 align="center">
-  Genshin account management discord bot
+  OXC BOT
 </h1>
 
 ## Requirements
@@ -14,24 +14,25 @@ First, install the required pip modules.
 pip install -r requirements.txt
 ```
 
-Then, setup your config file and cookies.
+Then, setup your configuration file.
 
 ```
-cp ./bot/src/configFile.py.example ./bot/src/configFile.py && cp ./bot/src/cookies.json.example ./bot/src/cookies.json
+cp ./.env.example ./.env
 ```
 
-Configure `configFile.py`.
-* `token`: Your discord bot token, used to log into your bot account. This can be found in Discord's developers portal > Your application > Bot > Token.
-* `owner_id`: The account ID of the Discord account of the one running in-charge of the bot. You can find out your Discord account ID by mentioning yourself in any chat, but before you send out the message, add a backslash `\` in front of your mention (i.e. `\@polygonalr`). Just copy out the numbers will do (without `@` and angle brackets `<>`).
-* `channel_whitelist`: Restrict Genshin related commands to certain channel names only. By setting it to an empty list, does not restrict at all.
+| Config Name | Description |
+|---|---|
+|`DATABASE_FILE`| Filename of the SQLite database. Default is `app.sqlite`|
+|`DISCORD_TOKEN`| Secret token of your Discord bot. This can be found in Discord's developers portal > your application > Bot > Token.|
+|`OWNER_ID`| Discord User ID of the owner of the bot. This is used for admin commands (which is still in development!). You can find out your Discord account ID by sending a message anywhere mentioning yourself, while adding a backslash `\` in front of your mention (i.e. `\@polygonalr`). Copy out only the numbers from the message (without `@` and angle brackets `<>`).|
 
-Add your cookies from HoYoLab to `cookies.json`. You can do so for multiple users.
+Add your cookies from HoYoLab to your SQLite database. You may want to run the `bot/src/database.py` to initialise the database file first. (Note: A more intuitive interface via admin commands is still under development.)
 
-Create a `crontab` to run `app.py` everyday to perform daily check in for all the accounts within `cookies.json`.
+Create a `crontab` to run `bot/src/checkin.py` everyday to perform daily check in for all the accounts within the database.
 
 To run the bot,
 
 ```
-python3.9 discordapp.py
+python3.9 bot/src/app.py
 ```
 
