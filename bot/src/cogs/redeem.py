@@ -9,6 +9,8 @@ from models import HoyolabAccount
 from util import get_all_genshin_accounts_with_token, get_all_starrail_accounts_with_token, get_account_by_name
 
 TIME_BETWEEN_REDEEMS = 2.5
+GENSHIN_REDEEM_LINK = "https://genshin.hoyoverse.com/en/gift?code="
+STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift"
 
 class Redeem(commands.Cog):
     def __init__(self, bot: Bot):
@@ -68,7 +70,10 @@ class Redeem(commands.Cog):
             )
         else:
             status_list = map(lambda s: f"{s['name']}: {s['status']}", logs)
-            desc = "\n".join(status_list) + "\n\nRedemption completed!"
+            desc = "\n".join(status_list) + "\n\nRedemption completed! [Click here for direct link.](" \
+                    + (GENSHIN_REDEEM_LINK + code if game_type == gs.Game.GENSHIN else STARRAIL_REDEEM_LINK) + ")"
+
+            desc = f"`{code}`\n\n" + desc
             embed = Embed(
                 description=desc,
                 colour=Colour.gold(),
