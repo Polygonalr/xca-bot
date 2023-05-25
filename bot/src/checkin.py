@@ -1,5 +1,4 @@
 import asyncio
-import os
 import genshin as gs
 
 from models import DailyCheckInStatus, CheckInStatus
