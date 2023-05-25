@@ -1,4 +1,5 @@
 import datetime
+import sys
 import time
 import genshin as gs
 from nextcord import Embed, Colour
@@ -96,9 +97,10 @@ class Notes(commands.Cog):
         except Exception as e:
             embed = Embed(
                     title="Exception occured",
-                    description=traceback.format_exc(),
+                    description="This is likely due to on-going maintenance. If it is a genuine problem, please report it to the developer.",
                     colour=Colour.brand_red(),
                     )
+            print(traceback.format_exc(), file=sys.stderr)
             await ctx.reply(embed=embed)
         
     async def get_notes(self, account):
