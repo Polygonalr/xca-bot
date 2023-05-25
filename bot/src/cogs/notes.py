@@ -102,6 +102,11 @@ class Notes(commands.Cog):
                     )
             print(traceback.format_exc(), file=sys.stderr)
             await ctx.reply(embed=embed)
+    
+    @commands.command(description="Don't shout. Alias for $notes.")
+    async def RE(self, ctx):
+        await ctx.reply("There's no need to shout here!")
+        await self.notes(ctx, None)
         
     async def get_notes(self, account):
         client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
