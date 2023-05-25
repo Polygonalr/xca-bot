@@ -44,14 +44,14 @@ async def checkin():
             await client.claim_daily_reward(reward=False)
             query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
             if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, DailyCheckInStatus.success)
+                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, CheckInStatus.success)
                 db_session.add(status)
             else:
                 query.update({"status": CheckInStatus.success})
         except gs.AlreadyClaimed:
             query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
             if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, DailyCheckInStatus.claimed)
+                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, CheckInStatus.claimed)
                 db_session.add(status)
             else:
                 query.update({"status": CheckInStatus.claimed})
