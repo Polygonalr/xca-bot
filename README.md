@@ -1,5 +1,5 @@
 <h1 align="center">
-  OXC BOT
+  XCA BOT
 </h1>
 
 ## Requirements
