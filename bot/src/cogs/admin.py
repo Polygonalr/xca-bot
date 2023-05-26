@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from models import DiscordUser, HoyolabAccount
 from database import db_session
 from dotenv import dotenv_values
+from util import get_account_by_ltuid
 
 config = dotenv_values(".env")
 
@@ -87,3 +88,49 @@ class Admin(commands.Cog):
             await ctx.reply("Added!")
         except IntegrityError:
             await ctx.reply("Already added!")
+
+    @commands.command(description="Update Hoyolab cookie_token for automated code redemption.")
+    async def updatetoken(self, ctx: Context, cookie: str=None):
+        COOKIE_UPDATE_INSTRUCTIONS = "1. [Click here to go to the code redemption page](https://hsr.hoyoverse.com/gift) and make sure you are logged in.\n" \
+                    + "2. Open the developer console (CTRL+SHIFT+J on Chrome, CTRL+SHIFT+K on Firefox).\n" \
+                    + "3. Copy and paste the following code into the console and press enter: `document.cookie`\n" \
+                    + "4. Copy the output and paste it into the command.\n"
+
+        if cookie == None:
+            embed = Embed(
+                description="Invalid arguments. Usage: `$update_token <cookie>`. To get your cookie:\n" + COOKIE_UPDATE_INSTRUCTIONS,
+                colour=Colour.red()
+            )
+            await ctx.reply(embed=embed)
+            return
+        
+        cookie = cookie.replace('"' , '').split("; ")
+        ltuid = [x for x in cookie if x.startswith("account_id=")][0].split("=")[1]
+        token = [x for x in cookie if x.startswith("cookie_token=")][0].split("=")[1]
+        if ltuid == None or token == None:
+            embed = Embed(
+                description="Cookie format provided is invalid!\n" + COOKIE_UPDATE_INSTRUCTIONS,
+                colour=Colour.red()
+            )
+            await ctx.reply(embed=embed)
+            return
+
+        account_to_update = get_account_by_ltuid(ltuid)
+        if account_to_update == None:
+            embed = Embed(
+                description="Account with the associated cookie cannot be found!",
+                colour=Colour.red()
+            )
+            await ctx.reply(embed=embed)
+            return
+
+        account_to_update.cookie_token = token
+        self.db_session.commit()
+        embed = Embed(
+            description=f"<@{ctx.author.id}> Updated cookie token for {account_to_update.name}!",
+            colour=Colour.green()
+        )
+        await ctx.reply(embed=embed)
+        await ctx.message.delete()
+
+        
