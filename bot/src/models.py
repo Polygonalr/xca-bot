@@ -80,6 +80,7 @@ class RedeemedGenshinCode(Base):
     __tablename__ = "redeemed_genshin_codes"
     id = Column(Integer, primary_key=True)
     code = Column(String)
+    created_at = Column(TIMESTAMP, server_default=func.now())
 
     def __init__(self, code: str):
         self.code = code
@@ -92,6 +93,7 @@ class RedeemedStarRailCode(Base):
     __tablename__ = "redeemed_starrail_codes"
     id = Column(Integer, primary_key=True)
     code = Column(String)
+    created_at = Column(TIMESTAMP, server_default=func.now())
 
     def __init__(self, code: str):
         self.code = code
