@@ -55,3 +55,7 @@ def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
 def get_account_by_name(name: str) -> HoyolabAccount:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.name == name).first()
+
+def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.ltuid == ltuid).first()
