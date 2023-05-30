@@ -76,3 +76,8 @@ def get_account_by_name(name: str) -> HoyolabAccount:
 def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.ltuid == ltuid).first()
+
+def remove_cookie_token(acc: HoyolabAccount) -> None:
+    acc.cookie_token = None
+    db_session.commit()
+    

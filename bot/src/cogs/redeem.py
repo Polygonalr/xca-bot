@@ -14,7 +14,8 @@ from util import get_all_genshin_accounts_with_token, \
     check_genshin_redeemed_code as check_gs, \
     check_starrail_redeemed_code as check_sr, \
     get_recent_genshin_codes as get_recent_gs, \
-    get_recent_starrail_codes as get_recent_sr
+    get_recent_starrail_codes as get_recent_sr, \
+    remove_cookie_token
 
 TIME_BETWEEN_REDEEMS = 2.5
 GENSHIN_REDEEM_LINK = "https://genshin.hoyoverse.com/en/gift?code="
@@ -92,7 +93,8 @@ class Redeem(commands.Cog):
         
         if len(logs) == 0:
             embed = Embed(
-                description="No accounts to redeem code for!",
+                description="No accounts to redeem code for! [Click here for direct link.](" \
+                    + (GENSHIN_REDEEM_LINK + code if game_type == gs.Game.GENSHIN else STARRAIL_REDEEM_LINK) + ")",
                 colour=Colour.brand_red(),
             )
         elif 'Invalid redemption code' in logs[0]['status']:
@@ -187,7 +189,11 @@ class Redeem(commands.Cog):
             try:
                 await client.redeem_code(code, uid=acc.genshin_uid)
             except gs.GenshinException as e:
-                redemption_attempt['status'] = str(e)
+                if "Cookies are not valid" in str(e):
+                    remove_cookie_token(acc)
+                    redemption_attempt['status'] = "Cookies are not valid and have been removed from the database."
+                else:
+                    redemption_attempt['status'] = str(e)
             else:
                 redemption_attempt['status'] = "Redeemed!"
             redeemed_users.append(redemption_attempt)
@@ -213,7 +219,11 @@ class Redeem(commands.Cog):
             try:
                 await client.redeem_code(code, uid=acc.starrail_uid)
             except gs.GenshinException as e:
-                redemption_attempt['status'] = str(e)
+                if "Cookies are not valid" in str(e):
+                    remove_cookie_token(acc)
+                    redemption_attempt['status'] = "Cookies are not valid and have been removed from the database."
+                else:
+                    redemption_attempt['status'] = str(e)
             else:
                 redemption_attempt['status'] = "Redeemed!"
             redeemed_users.append(redemption_attempt)
