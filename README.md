@@ -1,6 +1,8 @@
 <h1 align="center">
-  XCA BOT
+  XCA Bot
 </h1>
+
+Yet another Discord bot that mainly offers utility for HoYoverse games.
 
 ## Requirements
 
@@ -28,9 +30,11 @@ cp ./.env.example ./.env
 
 Add your cookies from HoYoLab to your SQLite database. You may want to run the `bot/src/database.py` to initialise the database file first. (Note: A more intuitive interface via admin commands is still under development.)
 
-Create a `crontab` to run `bot/src/checkin.py` everyday to perform daily check in for all the accounts within the database.
+Create a `crontab` to run `bot/src/checkin.py` everyday to perform daily check in for all the accounts within the database. Below is an example `crontab` job with `venv` configured for Python.
 
-To run the bot,
+```30 4 * * * cd /home/root/xca-bot && ./venv/bin/python3 ./bot/src/checkin.py```
+
+To run the bot Discord,
 
 ```
 python3.9 bot/src/app.py
