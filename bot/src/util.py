@@ -65,6 +65,16 @@ def get_genshin_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
         .filter(HoyolabAccount.discord_user_id == discord_id) \
         .filter(HoyolabAccount.genshin_uid != None).first()
 
+def get_starrail_acc_by_name(name: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.name == name) \
+        .filter(HoyolabAccount.starrail_uid != None).first()
+
+def get_starrail_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.discord_user_id == discord_id) \
+        .filter(HoyolabAccount.starrail_uid != None).first()
+
 def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.name == name).all()
