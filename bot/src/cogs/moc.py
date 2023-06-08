@@ -58,18 +58,18 @@ class MOC(commands.Cog):
             if stages_to_show == 1:
                 embed.description = f'Showing stats for {floors[0].name}'
             else:
-                embed.description = f'Showing stats for {floors[-stages_to_show].name} to {floors[-1].name}'
+                embed.description = f'Showing stats for {floors[-1].name} to {floors[-stages_to_show].name}'
+            details = ""
             firstteam = ""
             secondteam = ""
-            cycles_stars = ""
 
-            for floor in floors[-stages_to_show:]:
+            for floor in floors[-stages_to_show:][::-1]:
+                details += f"{floor.name}\n{floor.star_num} {MOC_STAR}\n{floor.round_num} cycles\n\n\n"
                 firstteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.avatars) + "\n\n"
                 secondteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_2.avatars) + "\n\n"
-                cycles_stars += f"{floor.round_num} | {floor.star_num}" + "\n" * max(len(floor.node_1.avatars), len(floor.node_2.avatars)) +  "\n"
+            embed.add_field(name='Stage', value=details)
             embed.add_field(name='1st team', value=firstteam)
             embed.add_field(name='2nd team', value=secondteam)
-            embed.add_field(name='Cycles | Stars', value=cycles_stars)
         await ctx.reply(embed=embed)
     
     # TODO cache the id to name mapping
