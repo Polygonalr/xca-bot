@@ -7,7 +7,7 @@ from util import get_all_genshin_accounts, get_all_starrail_accounts
 
 '''
 Claim daily rewards for all Genshin and Star Rail accounts.
-Badly written code but it works for now.
+Badly written code without DRY but it works for now.
 '''
 async def checkin():
     print(get_all_genshin_accounts())
@@ -32,6 +32,13 @@ async def checkin():
                 db_session.add(status)
             else:
                 query.update({"status": CheckInStatus.claimed})
+        except gs.GeetestTriggered:
+            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
+            if query.count() == 0:
+                status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, CheckInStatus.failed)
+                db_session.add(status)
+            else:
+                query.update({"status": CheckInStatus.failed})
         db_session.commit()
         await asyncio.sleep(5)
 
@@ -55,6 +62,13 @@ async def checkin():
                 db_session.add(status)
             else:
                 query.update({"status": CheckInStatus.claimed})
+        except gs.GeetestTriggered:
+            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
+            if query.count() == 0:
+                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, CheckInStatus.failed)
+                db_session.add(status)
+            else:
+                query.update({"status": CheckInStatus.failed})
         db_session.commit()
         await asyncio.sleep(5)
             
