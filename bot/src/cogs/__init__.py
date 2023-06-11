@@ -5,6 +5,8 @@ from .abyss import Abyss
 from .redeem import Redeem
 from .help import Help
 from .list import List
+from .moc import MOC
+from .buttontest import ButtonTest
 
 all_cogs = [
     Admin,
@@ -14,4 +16,6 @@ all_cogs = [
     Redeem,
     Help,
     List,
+    MOC,
+    ButtonTest,
 ]

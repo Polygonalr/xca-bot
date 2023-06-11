@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from models import DiscordUser, HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode
 from database import db_session
 from dotenv import dotenv_values
@@ -14,6 +15,22 @@ def check_genshin_redeemed_code(code: str) -> bool:
 def check_starrail_redeemed_code(code: str) -> bool:
     return db_session.query(RedeemedStarRailCode) \
         .filter(RedeemedStarRailCode.code == code).first() is not None
+
+def add_genshin_code(code: str) -> None:
+    db_session.add(RedeemedGenshinCode(code=code))
+    db_session.commit()
+
+def add_starrail_code(code: str) -> None:
+    db_session.add(RedeemedStarRailCode(code=code))
+    db_session.commit()
+
+def get_recent_genshin_codes() -> list[RedeemedGenshinCode]:
+    return db_session.query(RedeemedGenshinCode) \
+        .filter(RedeemedGenshinCode.created_at >= datetime.now() - timedelta(days=1)).all()
+
+def get_recent_starrail_codes() -> list[RedeemedStarRailCode]:
+    return db_session.query(RedeemedStarRailCode) \
+        .filter(RedeemedStarRailCode.created_at >= datetime.now() - timedelta(days=1)).all()
 
 def get_all_genshin_accounts() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
@@ -48,6 +65,16 @@ def get_genshin_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
         .filter(HoyolabAccount.discord_user_id == discord_id) \
         .filter(HoyolabAccount.genshin_uid != None).first()
 
+def get_starrail_acc_by_name(name: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.name == name) \
+        .filter(HoyolabAccount.starrail_uid != None).first()
+
+def get_starrail_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.discord_user_id == discord_id) \
+        .filter(HoyolabAccount.starrail_uid != None).first()
+
 def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.name == name).all()
@@ -59,3 +86,8 @@ def get_account_by_name(name: str) -> HoyolabAccount:
 def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.ltuid == ltuid).first()
+
+def remove_cookie_token(acc: HoyolabAccount) -> None:
+    acc.cookie_token = None
+    db_session.commit()
+    

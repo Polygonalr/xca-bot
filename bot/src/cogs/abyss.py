@@ -86,6 +86,7 @@ class Abyss(commands.Cog):
         embed.description = desc
         await ctx.reply(embed=embed)
 
+    @commands.command(description="Recaps characters used in the previous Spiral Abyss cycle clear.")
     async def abyssrecap(self, ctx: Context, name: str=None):
         floors = [9, 10, 11, 12]
         if name == None:
@@ -113,7 +114,7 @@ class Abyss(commands.Cog):
             embed.add_field(name=f"Characters used for floor {floor_number} chamber 1", value='\u200b', inline=False)
             first_chamber = curr.chambers[0]
             battles = first_chamber.battles
-            firsthalf, secondhalf = "\n".join(battles[0].characters), "\n".join(battles[1].characters)
+            firsthalf, secondhalf = "\n".join([c.name for c in battles[0].characters]), "\n".join([c.name for c in battles[1].characters])
             embed.add_field(name='1st half', value=firsthalf)
             embed.add_field(name='2nd half', value=secondhalf)
         await ctx.reply(embed=embed)
