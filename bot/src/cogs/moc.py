@@ -58,12 +58,12 @@ class MOC(commands.Cog):
             if stages_to_show == 1:
                 embed.description = f'Showing stats for {floors[0].name}'
             else:
-                embed.description = f'Showing stats for {floors[-1].name} to {floors[-stages_to_show].name}'
+                embed.description = f'Showing stats for {floors[stages_to_show-1].name} to {floors[0].name}'
             details = ""
             firstteam = ""
             secondteam = ""
 
-            for floor in floors[-stages_to_show:][::-1]:
+            for floor in floors[:stages_to_show][::-1]:
                 details += f"{floor.name}\n{floor.star_num} {MOC_STAR}\n{floor.round_num} cycles\n\n\n"
                 firstteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.avatars) + "\n\n"
                 secondteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_2.avatars) + "\n\n"

@@ -51,7 +51,7 @@ async def check_spiral_abyss_reset(ctx):
     if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
         if todayDate.day in [1, 16]:
             await ctx.reply(f"**It's spiral abyss reset day today** {KIRARA_COOKIE}")
-        elif todayDate.day in [13, 28]:
+        elif todayDate.day in [12, 27]:
             await ctx.reply(f"**It's memory of chaos reset day today** {KIRARA_COOKIE}")
         else:
             await ctx.reply(f"It's not spiral abyss & memory of chaos reset day today {KIRARA_COOKIE}")
