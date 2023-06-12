@@ -36,9 +36,10 @@ class MOC(commands.Cog):
 
         '''Then, grab the data for moc clears'''
         moc = await self.get_moc(account, prevFlag)
-        desc = "Total battles: {} | Best stage: {}\nTotal stars: {}\n"\
-            .format(moc.total_battles, moc.max_floor, moc.total_stars)
+        desc = "Total battles: {} | Total stars: {}\n"\
+            .format(moc.total_battles, moc.total_stars)
         floors = moc.floors
+
         if prevFlag:
             embed = Embed(
                     title=f"Previous cycle MoC stats for {account.name}",
@@ -53,23 +54,25 @@ class MOC(commands.Cog):
         '''Format last 3 stages clear details'''
         stages_to_show = min(3, len(floors))
         if stages_to_show == 0:
-            embed.description = f'{account.name} has not attempted Memory of Chaos yet!'
+            desc += f'{account.name} has not attempted Memory of Chaos yet!'
         else:
             if stages_to_show == 1:
-                embed.description = f'Showing stats for {floors[0].name}'
+                desc += f'Showing stats for {floors[0].name}'
             else:
-                embed.description = f'Showing stats for {floors[stages_to_show-1].name} to {floors[0].name}'
+                desc += f'Showing stats for {floors[stages_to_show-1].name} to {" ".join(floors[0].name.split(" ")[-2:])}'
             details = ""
             firstteam = ""
             secondteam = ""
 
             for floor in floors[:stages_to_show][::-1]:
-                details += f"{floor.name}\n{floor.star_num} {MOC_STAR}\n{floor.round_num} cycles\n\n\n"
+                details += f"{' '.join(floor.name.split(' ')[-2:])}\n{floor.star_num} {MOC_STAR}\n{floor.round_num} cycles\n\n\n"
                 firstteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.avatars) + "\n\n"
                 secondteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_2.avatars) + "\n\n"
             embed.add_field(name='Stage', value=details)
             embed.add_field(name='1st team', value=firstteam)
             embed.add_field(name='2nd team', value=secondteam)
+        
+        embed.description = desc
         await ctx.reply(embed=embed)
     
     # TODO cache the id to name mapping
