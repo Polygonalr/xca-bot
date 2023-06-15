@@ -10,9 +10,7 @@ Claim daily rewards for all Genshin and Star Rail accounts.
 Badly written code without DRY but it works for now.
 '''
 async def checkin():
-    print(get_all_genshin_accounts())
-    print(get_all_starrail_accounts())
-    for acc in get_all_genshin_accounts():
+    for acc in get_all_genshin_accounts(only_enabled=True):
         client = gs.Client({
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,
@@ -42,7 +40,7 @@ async def checkin():
         db_session.commit()
         await asyncio.sleep(5)
 
-    for acc in get_all_starrail_accounts():
+    for acc in get_all_starrail_accounts(only_enabled=True):
         client = gs.Client({
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,

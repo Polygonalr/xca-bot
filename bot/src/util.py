@@ -32,13 +32,19 @@ def get_recent_starrail_codes() -> list[RedeemedStarRailCode]:
     return db_session.query(RedeemedStarRailCode) \
         .filter(RedeemedStarRailCode.created_at >= datetime.now() - timedelta(days=1)).all()
 
-def get_all_genshin_accounts() -> list[HoyolabAccount]:
-    return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.genshin_uid.is_not(None)).all()
+def get_all_genshin_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    query = db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.genshin_uid.is_not(None))
+    if only_enabled:
+        return query.filter(HoyolabAccount.is_disabled.is_(True)).all()
+    return query.all()
 
-def get_all_starrail_accounts() -> list[HoyolabAccount]:
-    return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.starrail_uid.is_not(None)).all()
+def get_all_starrail_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    query = db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.starrail_uid.is_not(None))
+    if only_enabled:
+        return query.filter(HoyolabAccount.is_disabled.is_(True)).all()
+    return query.all()
 
 def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
