@@ -1,6 +1,6 @@
 import enum
 from genshin import Game
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, TIMESTAMP
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP
 from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -29,6 +29,7 @@ class HoyolabAccount(Base):
     ltuid = Column(Integer)
     ltoken = Column(String)
     cookie_token = Column(String, nullable=True)
+    is_disabled = Column(Boolean)
 
     starrail_uid = Column(Integer, nullable=True)
     genshin_uid = Column(Integer, nullable=True)

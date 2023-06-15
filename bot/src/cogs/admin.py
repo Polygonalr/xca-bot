@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from models import DiscordUser, HoyolabAccount
 from database import db_session
 from dotenv import dotenv_values
-from util import get_account_by_ltuid
+from util import get_account_by_ltuid, get_account_by_name
 
 config = dotenv_values(".env")
 
@@ -133,4 +133,36 @@ class Admin(commands.Cog):
         await ctx.reply(embed=embed)
         await ctx.message.delete()
 
+    @commands.command(description="Disable daily auto check-in for an account.")
+    @commands.check(is_owner)
+    async def disable(self, ctx: Context, name: str):
+        await self.set_is_disabled(ctx, name, True)
+    
+    @commands.command(description="Re-enable daily auto check-in for an account.")
+    @commands.check(is_owner)
+    async def enable(self, ctx: Context, name: str):
+        await self.set_is_disabled(ctx, name, False)
+
+    async def set_is_disabled(self, ctx: Context, name: str, new_val: bool):
+        if name == None:
+            await ctx.reply("Invalid arguments. Usage: `$disable <name>`")
+            return
+        account = get_account_by_name(name)
+        if account is None:
+            embed = Embed(
+                description=f'Error: User not found or does not have a HoYolab account: {name}',
+                colour=Colour.brand_red(),
+            )
+            await ctx.reply(embed=embed)
+            return
+        
+        account.is_disabled = new_val
+        self.db_session.commit()
+        enable_str = "Disabled" if new_val else "Enabled" 
+        embed = Embed(
+            description=f"{enable_str} daily check-in for {account.name}!",
+            colour=Colour.brand_green(),
+        )
+        await ctx.reply(embed=embed)
+        return
         
