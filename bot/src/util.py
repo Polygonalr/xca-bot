@@ -36,14 +36,14 @@ def get_all_genshin_accounts(only_enabled=False) -> list[HoyolabAccount]:
     query = db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.genshin_uid.is_not(None))
     if only_enabled:
-        return query.filter(HoyolabAccount.is_disabled.is_(True)).all()
+        return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
     return query.all()
 
 def get_all_starrail_accounts(only_enabled=False) -> list[HoyolabAccount]:
     query = db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.starrail_uid.is_not(None))
     if only_enabled:
-        return query.filter(HoyolabAccount.is_disabled.is_(True)).all()
+        return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
     return query.all()
 
 def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
