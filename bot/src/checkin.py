@@ -40,7 +40,7 @@ async def checkin():
         db_session.commit()
         await asyncio.sleep(5)
 
-    for acc in get_all_starrail_accounts(only_enabled=True):
+    for acc in get_all_starrail_accounts(only_enabled=False):
         client = gs.Client({
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,
