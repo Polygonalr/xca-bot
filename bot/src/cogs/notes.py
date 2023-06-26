@@ -6,6 +6,7 @@ from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 import traceback
+from database import db_session
 from models import HoyolabAccount
 from util import get_genshin_acc_by_discord_id, \
     get_genshin_acc_by_name, \
@@ -17,9 +18,12 @@ RESIN = "<:resin:927403591818420265>"
 KLEE_DERP = "<:KleeDerp:861458796772589608>"
 REALM_CURRENCY = "<:realmcurrency:948030718087405598>"
 PARAMETRIC = "<:parametric:971723428543479849>"
+PRIMOGEM = "<:primogem:1122773414751510578>"
 KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 TB_POWER = "<:trailblaze_power:1116269466095988746>"
 BAILU_DANGO = "<:bailu_dango:1116271590942974002>"
+
+CHECKIN_URL = "https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481"
 
 '''Cog with command that shows Real-time notes for Genshin.'''
 class Notes(commands.Cog):
@@ -73,9 +77,14 @@ class Notes(commands.Cog):
             else:
                 epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
                 desc += f"{PARAMETRIC} <t:{epoch_time}:R>"
+            
+            # Daily check-in
+            checkin_text = f":white_check_mark:" if (await self.get_genshin_checkin(genshin_account)).signed_in \
+                    else f":x: *[(Click here to check-in!)]({CHECKIN_URL})*"
+            desc += f"\n{PRIMOGEM} Daily Check-in: {checkin_text}\n\n"
 
             # Expeditions
-            desc += "\n\n**Expeditions**\n"
+            desc += "**Expeditions**\n"
             for idx, exp in enumerate(notes.expeditions):
                 desc += f"{idx + 1}. "
                 if exp.status == 'Ongoing':
@@ -173,7 +182,11 @@ class Notes(commands.Cog):
     async def get_genshin_notes(self, account: HoyolabAccount):
         client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
         return await client.get_genshin_notes(uid=account.genshin_uid)
-    
+
+    async def get_genshin_checkin(self, account: HoyolabAccount):
+        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        return await client.get_reward_info(game=gs.Game.GENSHIN)
+
     async def get_starrail_notes(self, account: HoyolabAccount):
         client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
         return await client.get_starrail_notes(uid=account.starrail_uid)

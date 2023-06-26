@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from models import DiscordUser, HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode
+from genshin.types import Game
+from models import DiscordUser, HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode, DailyCheckInStatus
 from database import db_session
 from dotenv import dotenv_values
 
@@ -96,4 +97,9 @@ def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
 def remove_cookie_token(acc: HoyolabAccount) -> None:
     acc.cookie_token = None
     db_session.commit()
-    
+
+def get_genshin_checkin_status(acc: HoyolabAccount) -> DailyCheckInStatus:
+    return db_session.query(DailyCheckInStatus) \
+        .filter(DailyCheckInStatus.genshin_uid == acc.genshin_uid) \
+        .filter(DailyCheckInStatus.game_type == Game.GENSHIN) \
+        .first()
