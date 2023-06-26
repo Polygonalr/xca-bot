@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from models import DiscordUser, HoyolabAccount
 from database import db_session
 from dotenv import dotenv_values
-from util import get_account_by_ltuid, get_account_by_name
+from util import get_account_by_ltuid, get_account_by_name, get_genshin_acc_by_discord_id
 
 config = dotenv_values(".env")
 
@@ -134,27 +134,39 @@ class Admin(commands.Cog):
         await ctx.message.delete()
 
     @commands.command(description="Disable daily auto check-in for an account.")
-    @commands.check(is_owner)
-    async def disable(self, ctx: Context, name: str):
+    async def disable(self, ctx: Context, name: str=None):
         await self.set_is_disabled(ctx, name, True)
     
     @commands.command(description="Re-enable daily auto check-in for an account.")
-    @commands.check(is_owner)
-    async def enable(self, ctx: Context, name: str):
+    async def enable(self, ctx: Context, name: str=None):
         await self.set_is_disabled(ctx, name, False)
 
     async def set_is_disabled(self, ctx: Context, name: str, new_val: bool):
         if name == None:
-            await ctx.reply("Invalid arguments. Usage: `$disable <name>`")
-            return
-        account = get_account_by_name(name)
-        if account is None:
+            account = get_genshin_acc_by_discord_id(ctx.author.id)
+            if account is None:
+                embed = Embed(
+                    description=f'Error: You do not have a Genshin account: {name}',
+                    colour=Colour.brand_red(),
+                )
+                await ctx.reply(embed=embed)
+                return
+        elif not is_owner(ctx.author):
             embed = Embed(
-                description=f'Error: User not found or does not have a HoYolab account: {name}',
+                description=f'Error: You do not have permissions to enable or disable other people\'s daily check-ins!',
                 colour=Colour.brand_red(),
             )
             await ctx.reply(embed=embed)
             return
+        else:
+            account = get_account_by_name(name)
+            if account is None:
+                embed = Embed(
+                    description=f'Error: User not found or does not have a HoYolab account: {name}',
+                    colour=Colour.brand_red(),
+                )
+                await ctx.reply(embed=embed)
+                return
         
         account.is_disabled = new_val
         self.db_session.commit()
