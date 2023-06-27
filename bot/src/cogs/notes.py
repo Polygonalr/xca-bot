@@ -79,7 +79,7 @@ class Notes(commands.Cog):
                 desc += f"{PARAMETRIC} <t:{epoch_time}:R>"
             
             # Daily check-in
-            checkin_text = f":white_check_mark:" if (await self.get_genshin_checkin(genshin_account)).signed_in \
+            checkin_text = f":ballot_box_with_check:" if (await self.get_genshin_checkin(genshin_account)).signed_in \
                     else f":x: *[(Click here to check-in!)]({CHECKIN_URL})*"
             desc += f"\n{PRIMOGEM} Daily Check-in: {checkin_text}\n\n"
 
