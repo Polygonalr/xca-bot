@@ -34,11 +34,12 @@ async def checkin():
             query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
             if query.count() == 0:
                 status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, CheckInStatus.failed)
-                # automatically disable account if geetest is triggered
-                acc.is_disabled = True
+                db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
                 db_session.add(status)
             else:
                 query.update({"status": CheckInStatus.failed})
+            # automatically disable account if geetest is triggered
+            acc.is_disabled = True
         db_session.commit()
         await asyncio.sleep(5)
 
