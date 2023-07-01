@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 from dotenv import dotenv_values
-import os
 import nextcord
 from nextcord.ext import commands
 
@@ -19,10 +18,9 @@ intents.typing = False
 intents.presences = False
 bot = commands.Bot(command_prefix='$', intents=intents)
 
-def launch():
+def launch_discord():
     init_db()
     bot.remove_command('help')
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
     @bot.event
     async def on_ready():
@@ -60,4 +58,4 @@ async def check_spiral_abyss_reset(ctx):
 
 
 if __name__ == "__main__":
-    launch()
+    launch_discord()
