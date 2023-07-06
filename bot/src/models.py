@@ -1,6 +1,6 @@
 import enum
 from genshin import Game
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Enum, TIMESTAMP, UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -75,7 +75,6 @@ class DailyCheckInStatus(Base):
     def __repr__(self):
         return f"<DailyCheckInStatus {self.account_id} {self.game_type} {self.status}>"
 
-
 '''For tracking genshin codes redeemed through the bot'''
 class RedeemedGenshinCode(Base):
     __tablename__ = "redeemed_genshin_codes"
@@ -101,3 +100,21 @@ class RedeemedStarRailCode(Base):
     
     def __repr__(self):
         return f"<RedeemedStarRailCode {self.id} {self.code}>"
+
+'''List of Telegram users who subscribe to code notifications'''
+class TelegramCodeSubscriber(Base):
+    __tablename__ = "telegram_code_subscribers"
+    id = Column(Integer, primary_key=True)
+    telegram_id = Column(Integer)
+    game_type = Column(Enum(Game), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    __table_args__ = (
+        UniqueConstraint('telegram_id', 'game_type', name='unique_telegram_id_game_type'),
+    )
+
+    def __init__(self, telegram_id: int, game_type: Game):
+        self.telegram_id = telegram_id
+        self.game_type = game_type
+    
+    def __repr__(self):
+        return f"<TelegramCodeSubscriber {self.id} {self.telegram_id} {self.game_type}>"

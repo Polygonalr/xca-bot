@@ -1,3 +1,4 @@
+from genshin.types import Game
 from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
@@ -5,7 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from models import DiscordUser, HoyolabAccount
 from database import db_session
 from dotenv import dotenv_values
-from util import get_account_by_ltuid, get_account_by_name, get_genshin_acc_by_discord_id
+from util import get_account_by_ltuid, get_account_by_name, get_genshin_acc_by_discord_id, get_recent_genshin_codes, get_recent_starrail_codes
+from telegram_util import broadcast_code as telegram_broadcast_code
 
 config = dotenv_values(".env")
 
@@ -140,6 +142,29 @@ class Admin(commands.Cog):
     @commands.command(description="Re-enable daily auto check-in for an account.")
     async def enable(self, ctx: Context, name: str=None):
         await self.set_is_disabled(ctx, name, False)
+    
+    @commands.command(description="Broadcast all recently redeemed code to Telegram bot")
+    @commands.check(is_owner)
+    async def broadcast_code(self, ctx: Context, game: str=None):
+        GAME_MAPPING = {
+            "genshin": Game.GENSHIN,
+            "starrail": Game.STARRAIL
+        }
+        if game == None:
+            await ctx.reply("Invalid arguments. Usage: $broadcast_code <genshin/starrail>")
+            return
+        elif game not in GAME_MAPPING:
+            await ctx.reply("Invalid game. Usage: $broadcast_code <genshin/starrail>")
+            return
+        
+        codes = get_recent_genshin_codes() if game == "genshin" else get_recent_starrail_codes()
+        codes = [x.code for x in codes]
+        if len(codes) == 0:
+            await ctx.reply("No codes to broadcast for " + game + "!")
+            return
+
+        await telegram_broadcast_code(codes, GAME_MAPPING[game])
+        await ctx.reply("Broadcasted codes for " + game + "!")
 
     async def set_is_disabled(self, ctx: Context, name: str, new_val: bool):
         if name == None:

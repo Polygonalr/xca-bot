@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from genshin.types import Game
-from models import DiscordUser, HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode, DailyCheckInStatus
+from models import DiscordUser, \
+    HoyolabAccount, \
+    RedeemedGenshinCode, \
+    RedeemedStarRailCode, \
+    DailyCheckInStatus
 from database import db_session
 from dotenv import dotenv_values
 
