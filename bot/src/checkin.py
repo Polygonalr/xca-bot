@@ -1,7 +1,7 @@
 import asyncio
 import genshin as gs
 
-from models import DailyCheckInStatus, CheckInStatus
+from models import DailyCheckInStatus, CheckInStatus, HoyolabAccount
 from database import init_db, db_session
 from util import get_all_genshin_accounts, get_all_starrail_accounts
 
