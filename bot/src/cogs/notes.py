@@ -22,6 +22,7 @@ PRIMOGEM = "<:primogem:1122773414751510578>"
 KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 TB_POWER = "<:trailblaze_power:1116269466095988746>"
 BAILU_DANGO = "<:bailu_dango:1116271590942974002>"
+KIRANYAN = "<:kiranyan1:1126353426880667688><:kiranyan2:1126353457570402364>" * 3 + "<:kiranyan3:1126353472065917028>"
 
 CHECKIN_URL = "https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481"
 
@@ -33,16 +34,43 @@ class Notes(commands.Cog):
     @commands.command(aliases=['re'], description="Get Real-time notes. Alias: `$re`")
     async def notes(self, ctx: Context, name: str=None):
         has_no_account = True
+        output = []
         
-        genshin_account = get_genshin_acc_by_name(name) if name is not None else get_genshin_acc_by_discord_id(ctx.author.id)
-        if genshin_account is not None:
-            await self.genshin_notes(ctx, genshin_account)
-            has_no_account = False    
+        try:
+            genshin_account = get_genshin_acc_by_name(name) if name is not None else get_genshin_acc_by_discord_id(ctx.author.id)
+            if genshin_account is not None:
+                has_no_account = False
+                output.append(await self.genshin_notes(ctx, genshin_account))
+        except gs.errors.DataNotPublic:
+            embed = Embed(
+                    title="Genshin Notes for " + genshin_account.name,
+                    description="[Error: Account did not enable Real-Time Notes. Click here to do so.](https://webstatic-sea.mihoyo.com/app/community-game-records-sea/index.html?#/ys/set)",
+                    colour=Colour.brand_red(),
+                    )
+            embed.set_image(url="https://media.discordapp.net/attachments/375466192397402124/927855237014884352/unknown.png")
+            await ctx.reply(embed=embed)
+        except Exception as e:
+            output.append({
+                "title": "Exception occured while retrieving Genshin notes",
+                "description": "This is likely due to on-going maintenance.\n" + \
+                    "The exception has been logged down, so if it is a genuine problem, please report it to the developer.",
+            })
+            print(traceback.format_exc(), file=sys.stderr)
+            await ctx.reply(embed=embed)
 
-        starrail_account = get_starrail_acc_by_name(name) if name is not None else get_starrail_acc_by_discord_id(ctx.author.id)
-        if starrail_account is  not None:
-            await self.starrail_notes(ctx, starrail_account)
-            has_no_account = False
+        try:
+            starrail_account = get_starrail_acc_by_name(name) if name is not None else get_starrail_acc_by_discord_id(ctx.author.id)
+            if starrail_account is not None:
+                has_no_account = False
+                output.append(await self.starrail_notes(ctx, starrail_account))
+        except Exception as e:
+            output.append({
+                "title": "Exception occured while retrieving Star Rail notes",
+                "description": "This is likely due to on-going maintenance.\n" + \
+                    "The exception has been logged down, so if it is a genuine problem, please report it to the developer.",
+            })
+            print(traceback.format_exc(), file=sys.stderr)
+            await ctx.reply(embed=embed)
 
         if has_no_account:
             embed = Embed(
@@ -50,6 +78,13 @@ class Notes(commands.Cog):
                 colour=Colour.brand_red(),
             )
             await ctx.reply(embed=embed)
+            return
+        
+        embed = Embed(title=KIRANYAN, colour=Colour.brand_green())
+        for note in output:
+            embed.add_field(name=note["title"], value=note["description"], inline=False)
+        await ctx.reply(embed=embed)
+
 
     async def genshin_notes(self, ctx: Context, genshin_account: HoyolabAccount):
         try:
@@ -85,42 +120,30 @@ class Notes(commands.Cog):
 
             # Expeditions
             desc += "**Expeditions**\n"
-            for idx, exp in enumerate(notes.expeditions):
-                desc += f"{idx + 1}. "
+            expedition_counter = {}
+            for exp in notes.expeditions:
                 if exp.status == 'Ongoing':
-                    hours = int(int(exp.remaining_time.total_seconds()) / 60 / 60)
-                    mins = int(int(exp.remaining_time.total_seconds()) / 60 - hours * 60)
-                    expdone_time = datetime.datetime.now() + exp.remaining_time
-                    desc += f"{hours} hr {mins} min ({expdone_time.strftime('%I:%M %p')})"
+                    ts = int(exp.remaining_time.total_seconds())
+                    expdone_time = (datetime.datetime.now() + exp.remaining_time).strftime("%I:%M %p")
+                    expedition_counter[expdone_time] = expedition_counter[expdone_time] + 1 if expdone_time in expedition_counter else 1
                 elif exp.status == 'Finished':
-                    desc += ":white_check_mark: " + exp.status
-                else:
-                    desc += exp.status
-                desc += "\n"
-            embed = Embed(
-                    title=f"{KIRARA_COOKIE} Genshin Notes for {genshin_account.name}",
-                    description=desc,
-                    colour=Colour.brand_green(),
-                    )
-            await ctx.reply(embed=embed)
+                    expedition_counter['now'] = expedition_counter['now'] + 1 if 'now' in expedition_counter else 1
 
-        except gs.errors.DataNotPublic:
-            embed = Embed(
-                    title="Genshin Notes for " + genshin_account.name,
-                    description="[Error: Account did not enable Real-Time Notes. Click here to do so.](https://webstatic-sea.mihoyo.com/app/community-game-records-sea/index.html?#/ys/set)",
-                    colour=Colour.brand_red(),
-                    )
-            embed.set_image(url="https://media.discordapp.net/attachments/375466192397402124/927855237014884352/unknown.png")
-            await ctx.reply(embed=embed)
+            if 'now' in expedition_counter:
+                desc += f"{expedition_counter['now']} expedition(s) ready to collect! :white_check_mark:\n"
+            for expdone_time in sorted(expedition_counter.keys()):
+                if expdone_time == "now":
+                    continue
+                desc += f"{expedition_counter[expdone_time]} ready at {expdone_time}\n"
+            desc += "\n"
 
+            return {
+                "title": f"{KIRARA_COOKIE} Genshin Notes for {genshin_account.name}",
+                "description": desc,
+            }
         except Exception as e:
-            embed = Embed(
-                    title="Exception occured",
-                    description="This is likely due to on-going maintenance. If it is a genuine problem, please report it to the developer.",
-                    colour=Colour.brand_red(),
-                    )
-            print(traceback.format_exc(), file=sys.stderr)
-            await ctx.reply(embed=embed)
+            # pass back to the main function to handle
+            raise e
 
     async def starrail_notes(self, ctx: Context, starrail_account: HoyolabAccount):
         try:
@@ -136,43 +159,30 @@ class Notes(commands.Cog):
 
             # Assignments
             desc += "\n\n**Assignments**\n"
-            for idx, exp in enumerate(notes.expeditions):
-                desc += f"{idx + 1}. "
+            assignment_counter = {}
+            for exp in notes.expeditions:
                 if exp.status == 'Ongoing':
-                    hours = int(int(exp.remaining_time.total_seconds()) / 60 / 60)
-                    mins = int(int(exp.remaining_time.total_seconds()) / 60 - hours * 60)
-                    expdone_time = datetime.datetime.now() + exp.remaining_time
-                    desc += f"{hours} hr {mins} min ({expdone_time.strftime('%I:%M %p')})"
+                    ts = int(exp.remaining_time.total_seconds())
+                    expdone_time = (datetime.datetime.now() + datetime.timedelta(seconds=ts)).strftime('%I:%M %p')
+                    assignment_counter[expdone_time] = assignment_counter[expdone_time] + 1 if expdone_time in assignment_counter else 1
                 elif exp.status == 'Finished':
-                    desc += ":white_check_mark: " + exp.status
-                else:
-                    desc += exp.status
-                desc += "\n"
+                    assignment_counter["now"] = assignment_counter["now"] + 1 if "now" in assignment_counter else 1
+                
+            if "now" in assignment_counter:
+                desc += f"{assignment_counter['now']} assignment(s) ready to collect! :white_check_mark:\n"
+            for expdone_time in sorted(assignment_counter.keys()):
+                if expdone_time == "now":
+                    continue
+                desc += f"{assignment_counter[expdone_time]} ready at {expdone_time}\n"
+            desc += "\n"
 
-            embed = Embed(
-                    title=f"{BAILU_DANGO} Star Rail Notes for {starrail_account.name}",
-                    description=desc,
-                    colour=Colour.brand_green(),
-                    )
-            await ctx.reply(embed=embed)
-
-        except gs.errors.DataNotPublic:
-            embed = Embed(
-                    title="Star Rail Notes for " + starrail_account.name,
-                    description="[Error: Account did not enable Real-Time Notes. Click here to do so.](https://webstatic-sea.mihoyo.com/app/community-game-records-sea/index.html?#/ys/set)",
-                    colour=Colour.brand_red(),
-                    )
-            embed.set_image(url="https://media.discordapp.net/attachments/375466192397402124/927855237014884352/unknown.png")
-            await ctx.reply(embed=embed)
-
+            return {
+                "title": f"{BAILU_DANGO} Star Rail Notes for {starrail_account.name}",
+                "description": desc,
+            }
         except Exception as e:
-            embed = Embed(
-                    title="Exception occured",
-                    description="This is likely due to on-going maintenance. If it is a genuine problem, please report it to the developer.",
-                    colour=Colour.brand_red(),
-                    )
-            print(traceback.format_exc(), file=sys.stderr)
-            await ctx.reply(embed=embed)
+            # pass back to the main function to handle
+            raise e
     
     @commands.command(description="Don't shout. Alias for $notes.")
     async def RE(self, ctx):
