@@ -1,7 +1,7 @@
 import asyncio
 import genshin as gs
 
-from models import DailyCheckInStatus, CheckInStatus
+from models import DailyCheckInStatus, CheckInStatus, HoyolabAccount
 from database import init_db, db_session
 from util import get_all_genshin_accounts, get_all_starrail_accounts
 
@@ -10,9 +10,7 @@ Claim daily rewards for all Genshin and Star Rail accounts.
 Badly written code without DRY but it works for now.
 '''
 async def checkin():
-    print(get_all_genshin_accounts())
-    print(get_all_starrail_accounts())
-    for acc in get_all_genshin_accounts():
+    for acc in get_all_genshin_accounts(only_enabled=True):
         client = gs.Client({
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,
@@ -36,13 +34,16 @@ async def checkin():
             query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
             if query.count() == 0:
                 status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, CheckInStatus.failed)
+                db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
                 db_session.add(status)
             else:
                 query.update({"status": CheckInStatus.failed})
+            # automatically disable account if geetest is triggered
+            acc.is_disabled = True
         db_session.commit()
         await asyncio.sleep(5)
 
-    for acc in get_all_starrail_accounts():
+    for acc in get_all_starrail_accounts(only_enabled=False):
         client = gs.Client({
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,

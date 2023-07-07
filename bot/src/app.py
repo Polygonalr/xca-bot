@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 from dotenv import dotenv_values
-import os
 import nextcord
 from nextcord.ext import commands
 
@@ -19,10 +18,9 @@ intents.typing = False
 intents.presences = False
 bot = commands.Bot(command_prefix='$', intents=intents)
 
-def launch():
+def launch_discord():
     init_db()
     bot.remove_command('help')
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
     @bot.event
     async def on_ready():
@@ -46,12 +44,16 @@ def launch():
     bot.run(config["DISCORD_TOKEN"])
 
 async def check_spiral_abyss_reset(ctx):
-    # check whether it's 1st or 16th of the month
-    todayDate = datetime.date.today()
     if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
-        if todayDate.day in [1, 16]:
+        MOC_RESET_DATE = datetime.date(2023, 6, 26)
+        todayDate = datetime.date.today()
+        abyss_reset = todayDate.day in [1, 16]
+        moc_reset = (todayDate - MOC_RESET_DATE) % 14 == 0
+        if abyss_reset and moc_reset:
+            await ctx.reply(f"**It's spiral abyss & memory of chaos reset day today** {KIRARA_COOKIE}")
+        elif abyss_reset:
             await ctx.reply(f"**It's spiral abyss reset day today** {KIRARA_COOKIE}")
-        elif todayDate.day in [12, 27]:
+        elif moc_reset:
             await ctx.reply(f"**It's memory of chaos reset day today** {KIRARA_COOKIE}")
         else:
             await ctx.reply(f"It's not spiral abyss & memory of chaos reset day today {KIRARA_COOKIE}")
@@ -60,4 +62,4 @@ async def check_spiral_abyss_reset(ctx):
 
 
 if __name__ == "__main__":
-    launch()
+    launch_discord()

@@ -1,5 +1,10 @@
 from datetime import datetime, timedelta
-from models import DiscordUser, HoyolabAccount, RedeemedGenshinCode, RedeemedStarRailCode
+from genshin.types import Game
+from models import DiscordUser, \
+    HoyolabAccount, \
+    RedeemedGenshinCode, \
+    RedeemedStarRailCode, \
+    DailyCheckInStatus
 from database import db_session
 from dotenv import dotenv_values
 
@@ -32,13 +37,19 @@ def get_recent_starrail_codes() -> list[RedeemedStarRailCode]:
     return db_session.query(RedeemedStarRailCode) \
         .filter(RedeemedStarRailCode.created_at >= datetime.now() - timedelta(days=1)).all()
 
-def get_all_genshin_accounts() -> list[HoyolabAccount]:
-    return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.genshin_uid.is_not(None)).all()
+def get_all_genshin_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    query = db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.genshin_uid.is_not(None))
+    if only_enabled:
+        return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
+    return query.all()
 
-def get_all_starrail_accounts() -> list[HoyolabAccount]:
-    return db_session.query(HoyolabAccount) \
-        .filter(HoyolabAccount.starrail_uid.is_not(None)).all()
+def get_all_starrail_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    query = db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.starrail_uid.is_not(None))
+    if only_enabled:
+        return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
+    return query.all()
 
 def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
@@ -90,4 +101,9 @@ def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
 def remove_cookie_token(acc: HoyolabAccount) -> None:
     acc.cookie_token = None
     db_session.commit()
-    
+
+def get_genshin_checkin_status(acc: HoyolabAccount) -> DailyCheckInStatus:
+    return db_session.query(DailyCheckInStatus) \
+        .filter(DailyCheckInStatus.genshin_uid == acc.genshin_uid) \
+        .filter(DailyCheckInStatus.game_type == Game.GENSHIN) \
+        .first()
