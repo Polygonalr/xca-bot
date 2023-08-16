@@ -62,6 +62,10 @@ class MOCView(View):
             await interaction.response.send_message("You are already at the first page!", ephemeral=True)
             return
         self.page -= 1
+        if self.page - 1 < 0:
+            self.prev_callback.disabled = True
+        if self.page + 1 < self.number_of_pages():
+            self.next_callback.disabled = False
         embed = render_embed(self.acc_name, self.data, self.char_names, self.page)
         await interaction.message.edit(embed=embed, view=self)
     
@@ -71,6 +75,10 @@ class MOCView(View):
             await interaction.response.send_message("You are already at the last page!", ephemeral=True)
             return
         self.page += 1
+        if self.page + 1 >= self.number_of_pages():
+            self.next_callback.disabled = True
+        if self.page - 1 >= 0:
+            self.prev_callback.disabled = False
         embed = render_embed(self.acc_name, self.data, self.char_names, self.page)
         await interaction.message.edit(embed=embed, view=self)
 
@@ -102,8 +110,10 @@ class MOC(commands.Cog):
         '''Then, grab the data for moc clears'''
         moc = await self.get_moc(account, prevFlag)
         embed = render_embed(account.name, moc, char_names)
+        view = MOCView(acc_name=account.name, data=moc, char_names=char_names)
+        view.prev_callback.disabled = True
 
-        await ctx.reply(embed=embed, view=MOCView(acc_name=account.name, data=moc, char_names=char_names))
+        await ctx.reply(embed=embed, view=view)
     
     # TODO cache the id to name mapping
     async def get_characters(self, account: HoyolabAccount):
