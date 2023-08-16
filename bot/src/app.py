@@ -48,7 +48,7 @@ async def check_spiral_abyss_reset(ctx):
         MOC_RESET_DATE = datetime.date(2023, 6, 26)
         todayDate = datetime.date.today()
         abyss_reset = todayDate.day in [1, 16]
-        moc_reset = (todayDate - MOC_RESET_DATE) % 14 == 0
+        moc_reset = (todayDate - MOC_RESET_DATE).days % 14 == 0
         if abyss_reset and moc_reset:
             await ctx.reply(f"**It's spiral abyss & memory of chaos reset day today** {KIRARA_COOKIE}")
         elif abyss_reset:
