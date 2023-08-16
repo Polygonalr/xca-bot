@@ -15,31 +15,23 @@ async def checkin():
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,
         }, game=gs.Game.GENSHIN)
+        query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
         try:
             await client.claim_daily_reward(reward=False)
-            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
-            if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, CheckInStatus.success)
-                db_session.add(status)
-            else:
-                query.update({"status": CheckInStatus.success})
+            new_status = CheckInStatus.success
         except gs.AlreadyClaimed:
-            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
-            if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, CheckInStatus.claimed)
-                db_session.add(status)
-            else:
-                query.update({"status": CheckInStatus.claimed})
+            new_status = CheckInStatus.claimed
         except gs.GeetestTriggered:
-            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
-            if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, CheckInStatus.failed)
-                db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
-                db_session.add(status)
-            else:
-                query.update({"status": CheckInStatus.failed})
-            # automatically disable account if geetest is triggered
+            new_status = CheckInStatus.failed
+            # Not too sure which 2 lines of code below works better, so might as well try both
+            db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
             acc.is_disabled = True
+        
+        if query.count() == 0:
+            status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, new_status)
+            db_session.add(status)
+        else:
+            query.update({"status": new_status})
         db_session.commit()
         await asyncio.sleep(5)
 
@@ -48,28 +40,20 @@ async def checkin():
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,
         }, game=gs.Game.STARRAIL)
+        query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
         try:
             await client.claim_daily_reward(reward=False)
-            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
-            if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, CheckInStatus.success)
-                db_session.add(status)
-            else:
-                query.update({"status": CheckInStatus.success})
+            new_status = CheckInStatus.success
         except gs.AlreadyClaimed:
-            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
-            if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, CheckInStatus.claimed)
-                db_session.add(status)
-            else:
-                query.update({"status": CheckInStatus.claimed})
+            new_status = CheckInStatus.claimed
         except gs.GeetestTriggered:
-            query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
-            if query.count() == 0:
-                status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, CheckInStatus.failed)
-                db_session.add(status)
-            else:
-                query.update({"status": CheckInStatus.failed})
+            new_status = CheckInStatus.failed
+        
+        if query.count() == 0:
+            status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, new_status)
+            db_session.add(status)
+        else:
+            query.update({"status": new_status})
         db_session.commit()
         await asyncio.sleep(5)
             
