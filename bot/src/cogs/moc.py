@@ -31,10 +31,7 @@ def render_embed(acc_name: str, data: StarRailChallenge, char_names: dict, page:
     if stages_to_show == 0:
         desc += f'{acc_name} has not attempted Memory of Chaos yet!'
     else:
-        if stages_to_show == 1:
-            desc += f'Showing stats for {strip(floors[0].name)}'
-        else:
-            desc += f'Showing stats for {strip(floors[stages_to_show-1].name)} to {strip(" ".join(floors[0].name.split(" ")[-2:]))}'
+        desc += f'Best stage: {strip(floors[0].name)}'
         details = ""
         firstteam = ""
         secondteam = ""
