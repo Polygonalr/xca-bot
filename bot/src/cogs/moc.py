@@ -13,6 +13,11 @@ from models import HoyolabAccount
 MOC_STAR = "<:mocstar:1116273875018317914>"
 PAGE_SIZE = 3
 
+def strip(name_str):
+     name_str = name_str.replace("<unbreak>", "")
+     name_str = name_str.replace("</unbreak>", "")
+     return name_str
+
 def render_embed(acc_name: str, data: StarRailChallenge, char_names: dict, page: int=0) -> Embed:
     desc = "Total battles: {} | Total stars: {}\n"\
         .format(data.total_battles, data.total_stars)
@@ -26,16 +31,13 @@ def render_embed(acc_name: str, data: StarRailChallenge, char_names: dict, page:
     if stages_to_show == 0:
         desc += f'{acc_name} has not attempted Memory of Chaos yet!'
     else:
-        if stages_to_show == 1:
-            desc += f'Showing stats for {floors[0].name}'
-        else:
-            desc += f'Showing stats for {floors[stages_to_show-1].name} to {" ".join(floors[0].name.split(" ")[-2:])}'
+        desc += f'Best stage: {strip(floors[0].name)}'
         details = ""
         firstteam = ""
         secondteam = ""
 
         for floor in floors[page*PAGE_SIZE:page*PAGE_SIZE+stages_to_show]:
-            details += f"{' '.join(floor.name.split(' ')[-2:])}\n{floor.star_num} {MOC_STAR}\n{floor.round_num} cycles\n\n\n"
+            details += f"{strip(' '.join(floor.name.split(' ')[-2:]))}\n{floor.star_num} {MOC_STAR}\n{floor.round_num} cycles\n\n\n"
             firstteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.avatars) + "\n\n"
             secondteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_2.avatars) + "\n\n"
         embed.add_field(name='Stage', value=details)
@@ -62,6 +64,10 @@ class MOCView(View):
             await interaction.response.send_message("You are already at the first page!", ephemeral=True)
             return
         self.page -= 1
+        if self.page - 1 < 0:
+            self.prev_callback.disabled = True
+        if self.page + 1 < self.number_of_pages():
+            self.next_callback.disabled = False
         embed = render_embed(self.acc_name, self.data, self.char_names, self.page)
         await interaction.message.edit(embed=embed, view=self)
     
@@ -71,6 +77,10 @@ class MOCView(View):
             await interaction.response.send_message("You are already at the last page!", ephemeral=True)
             return
         self.page += 1
+        if self.page + 1 >= self.number_of_pages():
+            self.next_callback.disabled = True
+        if self.page - 1 >= 0:
+            self.prev_callback.disabled = False
         embed = render_embed(self.acc_name, self.data, self.char_names, self.page)
         await interaction.message.edit(embed=embed, view=self)
 
@@ -102,8 +112,10 @@ class MOC(commands.Cog):
         '''Then, grab the data for moc clears'''
         moc = await self.get_moc(account, prevFlag)
         embed = render_embed(account.name, moc, char_names)
+        view = MOCView(acc_name=account.name, data=moc, char_names=char_names)
+        view.prev_callback.disabled = True
 
-        await ctx.reply(embed=embed, view=MOCView(acc_name=account.name, data=moc, char_names=char_names))
+        await ctx.reply(embed=embed, view=view)
     
     # TODO cache the id to name mapping
     async def get_characters(self, account: HoyolabAccount):

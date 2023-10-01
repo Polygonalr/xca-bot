@@ -176,7 +176,7 @@ class Admin(commands.Cog):
                 )
                 await ctx.reply(embed=embed)
                 return
-        elif not is_owner(ctx.author):
+        elif not is_owner(ctx):
             embed = Embed(
                 description=f'Error: You do not have permissions to enable or disable other people\'s daily check-ins!',
                 colour=Colour.brand_red(),
@@ -202,4 +202,3 @@ class Admin(commands.Cog):
         )
         await ctx.reply(embed=embed)
         return
-        

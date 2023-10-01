@@ -7,6 +7,7 @@ from .help import Help
 from .list import List
 from .moc import MOC
 from .buttontest import ButtonTest
+from .simu import Simu
 
 all_cogs = [
     Admin,
@@ -18,4 +19,5 @@ all_cogs = [
     List,
     MOC,
     ButtonTest,
+    Simu
 ]

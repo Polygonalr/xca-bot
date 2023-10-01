@@ -46,15 +46,25 @@ def launch_discord():
 async def check_spiral_abyss_reset(ctx):
     if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
         MOC_RESET_DATE = datetime.date(2023, 6, 26)
-        todayDate = datetime.date.today()
+        todayDate = datetime.datetime.today()
         abyss_reset = todayDate.day in [1, 16]
-        moc_reset = (todayDate - MOC_RESET_DATE) % 14 == 0
+        moc_reset = (todayDate - MOC_RESET_DATE).days % 14 == 0
+        after_four_am = todayDate.time() >= datetime.time(4, 0, 0)
         if abyss_reset and moc_reset:
-            await ctx.reply(f"**It's spiral abyss & memory of chaos reset day today** {KIRARA_COOKIE}")
+            if not after_four_am:
+                await ctx.reply(f"It's spiral abyss & memory of chaos reset day today, but it is not time yet! {KIRARA_COOKIE}")
+            else:
+                await ctx.reply(f"**It's spiral abyss & memory of chaos reset day today** {KIRARA_COOKIE}")
         elif abyss_reset:
-            await ctx.reply(f"**It's spiral abyss reset day today** {KIRARA_COOKIE}")
+            if not after_four_am:
+                await ctx.reply(f"It's spiral abyss reset today, but it is not time yet! {KIRARA_COOKIE}")
+            else:
+                await ctx.reply(f"**It's spiral abyss reset today** {KIRARA_COOKIE}")
         elif moc_reset:
-            await ctx.reply(f"**It's memory of chaos reset day today** {KIRARA_COOKIE}")
+            if not after_four_am:
+                await ctx.reply(f"It's memory of chaos reset today, but it is not time yet! {KIRARA_COOKIE}")
+            else:
+                await ctx.reply(f"**It's memory of chaos reset today** {KIRARA_COOKIE}")
         else:
             await ctx.reply(f"It's not spiral abyss & memory of chaos reset day today {KIRARA_COOKIE}")
         return True

@@ -79,6 +79,10 @@ class Notes(commands.Cog):
             )
             await ctx.reply(embed=embed)
             return
+
+        if len(output) > 1:
+            for i in range(len(output) - 1):
+                output[i]['description'] += f"\n{KIRANYAN}"
         
         embed = Embed(title=KIRANYAN, colour=Colour.brand_green())
         for note in output:
@@ -123,7 +127,6 @@ class Notes(commands.Cog):
             expedition_counter = {}
             for exp in notes.expeditions:
                 if exp.status == 'Ongoing':
-                    ts = int(exp.remaining_time.total_seconds())
                     expdone_time = (datetime.datetime.now() + exp.remaining_time).strftime("%I:%M %p")
                     expedition_counter[expdone_time] = expedition_counter[expdone_time] + 1 if expdone_time in expedition_counter else 1
                 elif exp.status == 'Finished':
@@ -135,7 +138,6 @@ class Notes(commands.Cog):
                 if expdone_time == "now":
                     continue
                 desc += f"{expedition_counter[expdone_time]} ready at {expdone_time}\n"
-            desc += "\n"
 
             return {
                 "title": f"{KIRARA_COOKIE} Genshin Notes for {genshin_account.name}",
