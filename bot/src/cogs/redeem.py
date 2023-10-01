@@ -19,7 +19,7 @@ from util import get_all_genshin_accounts_with_token, \
 
 TIME_BETWEEN_REDEEMS = 2.5
 GENSHIN_REDEEM_LINK = "https://genshin.hoyoverse.com/en/gift?code="
-STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift"
+STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift?code="
 
 '''Cog which has commands to redeem codes for all accounts with cookie_token.'''
 class Redeem(commands.Cog):
@@ -94,7 +94,7 @@ class Redeem(commands.Cog):
         if len(logs) == 0:
             embed = Embed(
                 description="No accounts to redeem code for! [Click here for direct link.](" \
-                    + (GENSHIN_REDEEM_LINK + code if game_type == gs.Game.GENSHIN else STARRAIL_REDEEM_LINK) + ")",
+                    + (GENSHIN_REDEEM_LINK + code if game_type == gs.Game.GENSHIN else STARRAIL_REDEEM_LINK + code) + ")",
                 colour=Colour.brand_red(),
             )
         elif 'Invalid redemption code' in logs[0]['status']:
@@ -105,7 +105,7 @@ class Redeem(commands.Cog):
         else:
             status_list = map(lambda s: f"{s['name']}: {s['status']}", logs)
             desc = "\n".join(status_list) + "\n\nRedemption completed! [Click here for direct link.](" \
-                    + (GENSHIN_REDEEM_LINK + code if game_type == gs.Game.GENSHIN else STARRAIL_REDEEM_LINK) + ")"
+                    + (GENSHIN_REDEEM_LINK + code if game_type == gs.Game.GENSHIN else STARRAIL_REDEEM_LINK + code) + ")"
 
             desc = f"`{code}`\n\n" + desc
             embed = Embed(

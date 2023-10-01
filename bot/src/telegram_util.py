@@ -15,7 +15,7 @@ NAME_MAPPING = {
 }
 
 GENSHIN_REDEEM_LINK = "https://genshin.hoyoverse.com/en/gift?code="
-STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift"
+STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift?code="
 
 config = dotenv_values(".env")
 app = Application.builder().token(config["TELEGRAM_TOKEN"]).build()
@@ -84,15 +84,15 @@ async def broadcast_code(codes: List[str], game: Game):
     bot = Bot(token=config["TELEGRAM_TOKEN"])
 
     if game == Game.GENSHIN:
-        for sub in subscriptions:
-            await bot.send_message(chat_id=sub.telegram_id, text="*New Genshin Impact code\(s\) available\!*\nClick on the links below or copy the codes to redeem them\!", parse_mode="MarkdownV2")
-            for code in codes:
-                await bot.send_message(chat_id=sub.telegram_id, text=f"[{code}]({GENSHIN_REDEEM_LINK+code})", parse_mode="MarkdownV2", disable_web_page_preview=True)
-    elif game == Game.STARRAIL:
-        for sub in subscriptions:
-            await bot.send_message(chat_id=sub.telegram_id, text=f"*New Star Rail code\(s\) available\!*\n[Click here for the link to redeem them\!]({STARRAIL_REDEEM_LINK})", parse_mode="MarkdownV2")
-            for code in codes:
-                await bot.send_message(chat_id=sub.telegram_id, text=code, parse_mode="MarkdownV2")
+        link = GENSHIN_REDEEM_LINK
+    else:
+        link = STARRAIL_REDEEM_LINK
+
+    for sub in subscriptions:
+        await bot.send_message(chat_id=sub.telegram_id, text=f"*New {NAME_MAPPING[game]} code\(s\) available\!*\nClick on the links below or copy the codes to redeem them\!", parse_mode="MarkdownV2")
+        for code in codes:
+            await bot.send_message(chat_id=sub.telegram_id, text=f"[{code}]({link+code})", parse_mode="MarkdownV2", disable_web_page_preview=True)
+
     return
 
 if __name__ == "__main__":
