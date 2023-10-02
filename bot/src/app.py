@@ -48,7 +48,7 @@ async def check_spiral_abyss_reset(ctx):
         MOC_RESET_DATE = datetime.date(2023, 6, 26)
         todayDate = datetime.datetime.today()
         abyss_reset = todayDate.day in [1, 16]
-        moc_reset = (todayDate - MOC_RESET_DATE).days % 14 == 0
+        moc_reset = (todayDate.date() - MOC_RESET_DATE).days % 14 == 0
         after_four_am = todayDate.time() >= datetime.time(4, 0, 0)
         if abyss_reset and moc_reset:
             if not after_four_am:
