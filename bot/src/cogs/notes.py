@@ -19,6 +19,7 @@ KLEE_DERP = "<:KleeDerp:861458796772589608>"
 REALM_CURRENCY = "<:realmcurrency:948030718087405598>"
 PARAMETRIC = "<:parametric:971723428543479849>"
 PRIMOGEM = "<:primogem:1122773414751510578>"
+COMMS = "<:comms:1167786484296843324>"
 KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 TB_POWER = "<:trailblaze_power:1116269466095988746>"
 KURUKURU = "<a:kurukuru:1166577731429998663>"
@@ -117,10 +118,16 @@ class Notes(commands.Cog):
                 epoch_time = int(time.time()) + int(notes.remaining_transformer_recovery_time.total_seconds())
                 desc += f"{PARAMETRIC} <t:{epoch_time}:R>"
             
-            # Daily check-in
-            checkin_text = f":ballot_box_with_check:" if (await self.get_genshin_checkin(genshin_account)).signed_in \
-                    else f":x: *[(Click here to check-in!)]({CHECKIN_URL})*"
-            desc += f"\n{PRIMOGEM} Daily Check-in: {checkin_text}\n\n"
+            # Daily check-in, retired for now since there's no more captcha
+            # checkin_text = f":ballot_box_with_check:" if (await self.get_genshin_checkin(genshin_account)).signed_in \
+            #         else f":x: *[(Click here to check-in!)]({CHECKIN_URL})*"
+            # desc += f"\n{PRIMOGEM} Daily Check-in: {checkin_text}\n\n"
+
+            dt = notes.daily_task 
+            desc += f"\n{COMMS} {dt.completed_tasks}/{dt.max_tasks} done\n"
+            if not dt.claimed_commission_reward:
+                desc += "**Commission reward not claimed!** <:nonoseganyu:927411234226176040>\n"
+            desc += "\n"
 
             # Expeditions
             desc += "**Expeditions**\n"
