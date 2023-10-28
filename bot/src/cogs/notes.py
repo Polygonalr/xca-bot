@@ -21,7 +21,7 @@ PARAMETRIC = "<:parametric:971723428543479849>"
 PRIMOGEM = "<:primogem:1122773414751510578>"
 KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 TB_POWER = "<:trailblaze_power:1116269466095988746>"
-BAILU_DANGO = "<:bailu_dango:1116271590942974002>"
+KURUKURU = "<a:kurukuru:1166577731429998663>"
 KIRANYAN = "<:kiranyan1:1126353426880667688><:kiranyan2:1126353457570402364>" * 3 + "<:kiranyan3:1126353472065917028>"
 
 CHECKIN_URL = "https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481"
@@ -179,7 +179,7 @@ class Notes(commands.Cog):
             desc += "\n"
 
             return {
-                "title": f"{BAILU_DANGO} Star Rail Notes for {starrail_account.name}",
+                "title": f"{KURUKURU} Star Rail Notes for {starrail_account.name}",
                 "description": desc,
             }
         except Exception as e:
@@ -188,7 +188,7 @@ class Notes(commands.Cog):
     
     @commands.command(description="Don't shout. Alias for $notes.")
     async def RE(self, ctx):
-        await ctx.reply("There's no need to shout here!")
+        await ctx.reply(f"There's no need to shout here! {KURUKURU}")
         await self.notes(ctx, None)
         
     async def get_genshin_notes(self, account: HoyolabAccount):
