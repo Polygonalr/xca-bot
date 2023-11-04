@@ -22,6 +22,7 @@ PRIMOGEM = "<:primogem:1122773414751510578>"
 COMMS = "<:comms:1167786484296843324>"
 KIRARA_COOKIE = "<:KiraraCookie:1110172718520873040>"
 TB_POWER = "<:trailblaze_power:1116269466095988746>"
+DAILY_TRAINING = "<:dailytraining:1170268830422020177>"
 KURUKURU = "<a:kurukuru:1166577731429998663>"
 KIRANYAN = "<:kiranyan1:1126353426880667688><:kiranyan2:1126353457570402364>" * 3 + "<:kiranyan3:1126353472065917028>"
 
@@ -165,6 +166,9 @@ class Notes(commands.Cog):
             else:
                 maxout_time = datetime.datetime.now() + notes.stamina_recover_time
                 desc += maxout_time.strftime(" (Maxout - %I:%M %p)")
+
+            # Daily Training
+            desc += f"\n{DAILY_TRAINING} {notes.current_train_score}/{notes.max_train_score}"
 
             # Assignments
             desc += "\n\n**Assignments**\n"
