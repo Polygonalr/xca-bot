@@ -45,28 +45,35 @@ def launch_discord():
 
 async def check_spiral_abyss_reset(ctx):
     if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
-        MOC_RESET_DATE = datetime.date(2023, 6, 26)
+        MOC_RESET_DATE = datetime.date(2023, 12, 25)
+        PF_RESET_DATE = datetime.date(2024, 8, 1)
         todayDate = datetime.datetime.today()
         abyss_reset = todayDate.day in [1, 16]
-        moc_reset = (todayDate.date() - MOC_RESET_DATE).days % 14 == 0
+        moc_reset = (todayDate.date() - MOC_RESET_DATE).days % 28 == 0
+        pf_reset = (todayDate.date() - PF_RESET_DATE).days % 28 == 0
         after_four_am = todayDate.time() >= datetime.time(4, 0, 0)
-        if abyss_reset and moc_reset:
+        if abyss_reset:
+            extra_text = ""
+            if moc_reset:
+                extra_text = " & Memory of Chaos"
+            elif pf_reset:
+                extra_text = " & Pure Fiction"
             if not after_four_am:
-                await ctx.reply(f"It's spiral abyss & memory of chaos reset day today, but it is not time yet! {KIRARA_COOKIE}")
+                await ctx.reply(f"It's Spiral Abyss{extra_text} reset day today, but it is not time yet! {KIRARA_COOKIE}")
             else:
-                await ctx.reply(f"**It's spiral abyss & memory of chaos reset day today** {KIRARA_COOKIE}")
-        elif abyss_reset:
-            if not after_four_am:
-                await ctx.reply(f"It's spiral abyss reset today, but it is not time yet! {KIRARA_COOKIE}")
-            else:
-                await ctx.reply(f"**It's spiral abyss reset today** {KIRARA_COOKIE}")
+                await ctx.reply(f"**It's Spiral Abyss{extra_text} reset day today** {KIRARA_COOKIE}")
         elif moc_reset:
             if not after_four_am:
-                await ctx.reply(f"It's memory of chaos reset today, but it is not time yet! {KIRARA_COOKIE}")
+                await ctx.reply(f"It's Memory of Chaos reset today, but it is not time yet! {KIRARA_COOKIE}")
             else:
-                await ctx.reply(f"**It's memory of chaos reset today** {KIRARA_COOKIE}")
+                await ctx.reply(f"**It's Memory of Chaos reset today** {KIRARA_COOKIE}")
+        elif pf_reset:
+            if not after_four_am:
+                await ctx.reply(f"It's Pure Fiction reset today, but it is not time yet! {KIRARA_COOKIE}")
+            else:
+                await ctx.reply(f"**It's Pure Fiction reset today** {KIRARA_COOKIE}")
         else:
-            await ctx.reply(f"It's not spiral abyss & memory of chaos reset day today {KIRARA_COOKIE}")
+            await ctx.reply(f"It's not Spiral Abyss, Memory of Chaos or Pure Fiction reset day yet! {KIRARA_COOKIE}")
         return True
     return False
 
