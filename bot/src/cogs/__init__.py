@@ -9,6 +9,7 @@ from .moc import MOC
 from .buttontest import ButtonTest
 from .simu import Simu
 from .enka import Enka
+from .pf import Pf
 
 all_cogs = [
     Admin,
@@ -21,5 +22,6 @@ all_cogs = [
     MOC,
     ButtonTest,
     Simu,
-    Enka
+    Enka,
+    Pf
 ]
