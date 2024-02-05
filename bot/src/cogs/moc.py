@@ -21,7 +21,7 @@ def strip(name_str):
 def render_embed(acc_name: str, data: StarRailChallenge, char_names: dict, page: int=0) -> Embed:
     desc = "Total battles: {} | Total stars: {}\n"\
         .format(data.total_battles, data.total_stars)
-    floors = data.floors
+    floors = list(filter(lambda x: len(x.node_1.avatars) > 0, data.floors))
 
     embed = Embed(
         title=f"Memory of Chaos stats for {acc_name}",
@@ -56,7 +56,8 @@ class MOCView(View):
         super().__init__(timeout=None)
     
     def number_of_pages(self) -> int:
-        return (len(self.data.floors) + PAGE_SIZE - 1) // PAGE_SIZE
+        num_floors = len(list(filter(lambda x: len(x.node_1.avatars) > 0, self.data.floors)))
+        return (num_floors + PAGE_SIZE - 1) // PAGE_SIZE
     
     @button(label="", custom_id="moc-prev", style=1, emoji="⬅️")
     async def prev_callback(self, button, interaction: Interaction):
@@ -126,6 +127,6 @@ class MOC(commands.Cog):
             mapping[character.id] = character.name
         return mapping
 
-    async def get_moc(self, account: HoyolabAccount, prevFlag) -> StarRailChallenge:
+    async def get_moc(self, account: HoyolabAccount, prevFlag):
         client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
         return await client.get_starrail_challenge(uid=account.starrail_uid, previous=prevFlag)

@@ -1,5 +1,5 @@
 import genshin as gs
-from genshin.models import StarRailChallenge
+from genshin.models import StarRailPureFiction
 from nextcord import Embed, Colour
 from nextcord import Interaction
 from nextcord.ext import commands
@@ -45,6 +45,7 @@ class Pf(commands.Cog):
 
         '''Then, grab the data for pf clears'''
         pf = await self.get_pf(account, prevFlag)
+        pf_floors = list(filter(lambda x: len(x.node_1.avatars) > 0, pf.floors))
         embed = Embed(
             title=f"Pure Fiction stats for {account.name}",
             colour=Colour.brand_green(),
@@ -52,7 +53,7 @@ class Pf(commands.Cog):
 
         desc = "Total battles: {} | Total stars: {}\n".format(pf.total_battles, pf.total_stars)
 
-        if len(pf.floors) == 0:
+        if len(pf_floors) == 0:
             desc += f'{account.name} has not attempted Pure Fiction yet!'
         else:
             desc += f'Best stage: {strip(pf.floors[0].name)}'
@@ -60,12 +61,12 @@ class Pf(commands.Cog):
             first_team = ""
             second_team = ""
 
-            for floor in pf.floors:
+            for floor in pf_floors:
                 total_score = floor.node_1.score + floor.node_2.score
                 details += f"{strip(' '.join(floor.name.split(' ')[-2:]))}\n{floor.star_num} {MOC_STAR}\nFirst Half: {floor.node_1.score}\nSecond Half: {floor.node_2.score}\nTotal score: {total_score}\n\n"
-                first_team += f"**Buff**: {floor.node_1.buff.name}\n"
+                first_team += f"**Buff**: { 'No buff' if floor.node_1.buff is None else floor.node_1.buff.name }\n"
                 first_team += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.avatars) + "\n\n"
-                second_team += f"**Buff**: {floor.node_2.buff.name}\n"
+                second_team += f"**Buff**: { 'No buff' if floor.node_2.buff is None else floor.node_2.buff.name }\n"
                 second_team += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_2.avatars) + "\n\n"
             embed.add_field(name='Stage', value=details)
             embed.add_field(name='1st team', value=first_team)
@@ -83,6 +84,6 @@ class Pf(commands.Cog):
             mapping[character.id] = character.name
         return mapping
 
-    async def get_pf(self, account: HoyolabAccount, prevFlag) -> StarRailChallenge:
+    async def get_pf(self, account: HoyolabAccount, prevFlag) -> StarRailPureFiction:
         client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
-        return await client.get_starrail_challenge_story(uid=account.starrail_uid, previous=prevFlag)
+        return await client.get_starrail_pure_fiction(uid=account.starrail_uid, previous=prevFlag)

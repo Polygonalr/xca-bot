@@ -46,7 +46,7 @@ def launch_discord():
 async def check_spiral_abyss_reset(ctx):
     if ("today" in ctx.content or "reset" in ctx.content) and "?" in ctx.content:
         MOC_RESET_DATE = datetime.date(2023, 12, 25)
-        PF_RESET_DATE = datetime.date(2024, 8, 1)
+        PF_RESET_DATE = datetime.date(2024, 1, 8)
         todayDate = datetime.datetime.today()
         abyss_reset = todayDate.day in [1, 16]
         moc_reset = (todayDate.date() - MOC_RESET_DATE).days % 28 == 0
