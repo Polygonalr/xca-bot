@@ -10,6 +10,7 @@ from .buttontest import ButtonTest
 from .simu import Simu
 from .enka import Enka
 from .pf import Pf
+from .hsr_showbuild import HSRShowBuild
 
 all_cogs = [
     Admin,
@@ -23,5 +24,6 @@ all_cogs = [
     ButtonTest,
     Simu,
     Enka,
-    Pf
+    Pf,
+    HSRShowBuild
 ]
