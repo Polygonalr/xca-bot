@@ -95,7 +95,7 @@ class Notes(commands.Cog):
             notes = await self.get_genshin_notes(genshin_account)
 
             # Resin
-            desc = f"{RESIN} {notes.current_resin}/160"
+            desc = f"{RESIN} {notes.current_resin}/{notes.max_resin}"
             if int(notes.remaining_resin_recovery_time.total_seconds()) == 0:
                 desc += KLEE_DERP
             else:
