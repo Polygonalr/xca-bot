@@ -11,6 +11,7 @@ from .simu import Simu
 from .enka import Enka
 from .pf import Pf
 from .hsr_showbuild import HSRShowBuild
+from .apcshadow import ApcShadow
 
 all_cogs = [
     Admin,
@@ -25,5 +26,6 @@ all_cogs = [
     Simu,
     Enka,
     Pf,
-    HSRShowBuild
+    HSRShowBuild,
+    ApcShadow
 ]
