@@ -3,10 +3,10 @@ import genshin as gs
 
 from models import DailyCheckInStatus, CheckInStatus, HoyolabAccount
 from database import init_db, db_session
-from util import get_all_genshin_accounts, get_all_starrail_accounts
+from util import get_all_genshin_accounts, get_all_starrail_accounts, get_all_zzz_accounts
 
 '''
-Claim daily rewards for all Genshin and Star Rail accounts.
+Claim daily rewards for all Genshin, HSR and ZZZ accounts.
 Badly written code without DRY but it works for now.
 '''
 async def checkin():
@@ -57,6 +57,19 @@ async def checkin():
         db_session.commit()
         await asyncio.sleep(5)
             
+    for acc in get_all_zzz_accounts(only_enabled=False):
+        client = gs.Client({
+            "ltuid": acc.ltuid,
+            "ltoken": acc.ltoken,
+        }, game=gs.Game.ZZZ)
+        try:
+            await client.claim_daily_reward(reward=False)
+        except gs.AlreadyClaimed:
+            print("Already claimed")
+        except gs.GeetestTriggered:
+            print("Damn captcha")
+
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
     init_db()

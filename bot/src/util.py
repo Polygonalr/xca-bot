@@ -57,6 +57,13 @@ def get_all_starrail_accounts(only_enabled=False) -> list[HoyolabAccount]:
         return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
     return query.all()
 
+def get_all_zzz_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    query = db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.zzz_uid.is_not(None))
+    if only_enabled:
+        return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
+    return query.all()
+
 def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.genshin_uid.is_not(None),
@@ -106,6 +113,7 @@ def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
 
 def remove_cookie_token(acc: HoyolabAccount) -> None:
     acc.cookie_token = None
+    acc.ltoken_v2 = None
     db_session.commit()
 
 def get_genshin_checkin_status(acc: HoyolabAccount) -> DailyCheckInStatus:
