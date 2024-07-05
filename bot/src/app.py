@@ -32,7 +32,7 @@ def launch_discord():
         if ctx.author == bot.user or ctx.author.id not in get_all_discord_ids():
             return
 
-        print(f"Message from {ctx.author}: {ctx.content}")
+        # print(f"Message from {ctx.author}: {ctx.content}")
         if await check_spiral_abyss_reset(ctx):
             return
 

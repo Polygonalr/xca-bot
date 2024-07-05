@@ -1,9 +1,14 @@
 from enum import Enum
 import time
 import genshin as gs
+import keyring
+from Crypto.Cipher import AES
 from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
+from keyrings.cryptfile.cryptfile import CryptFileKeyring
+from database import db_session
+from dotenv import dotenv_values
 
 from models import HoyolabAccount
 from util import get_all_genshin_accounts_with_token, \
@@ -15,18 +20,102 @@ from util import get_all_genshin_accounts_with_token, \
     check_starrail_redeemed_code as check_sr, \
     get_recent_genshin_codes as get_recent_gs, \
     get_recent_starrail_codes as get_recent_sr, \
-    remove_cookie_token
+    remove_cookie_token, \
+    get_all_accounts
 
 TIME_BETWEEN_REDEEMS = 2.5
 GENSHIN_REDEEM_LINK = "https://genshin.hoyoverse.com/en/gift?code="
 STARRAIL_REDEEM_LINK = "https://hsr.hoyoverse.com/gift?code="
 
+config = dotenv_values(".env")
+
+def is_owner(ctx: Context) -> bool:
+    yes = ctx.author.id == int(config["OWNER_ID"])
+    if not yes:
+        embed = Embed(
+            description="You are not authorized to use this command.",
+            colour=Colour.brand_red()
+        )
+        ctx.reply(embed=embed)
+    return yes
+
 '''Cog which has commands to redeem codes for all accounts with cookie_token.'''
 class Redeem(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.keyring_unlocked = False
+        self.kr = CryptFileKeyring()
+    
+    @commands.command(description="Unlock keyring to retrieve cookie_token_v2")
+    @commands.check(is_owner)
+    async def unlock_keyring(self, ctx: Context, master_password: str=None):
+        DELIMITER = ":::"
+        if master_password == None:
+            embed = Embed(
+                description="Error: please specify the master password.\nUsage: $decrypt <master_password>",
+                colour=Colour.brand_red()
+            )
+            await ctx.reply(embed=embed)
+            return
+        try:
+            self.kr.keyring_key = master_password
+        except ValueError as e:
+            embed = Embed(
+                description="Wrong master password!",
+                colour=Colour.brand_red()
+            )
+            await ctx.reply(embed=embed)
+            return
+        self.keyring_unlocked = True
+        embed = Embed(
+            description="Keyring unlocked, caching cookie_token_v2...",
+            colour=Colour.brand_green()
+        )
+        await ctx.reply(embed=embed)
 
-    @commands.command(description="Redeem code for all genshin accounts with cookie_token.")
+        successful_retrieves=[]
+
+        for account in get_all_accounts(only_enabled=True):
+            cred = self.kr.get_password("xca-bot", account.name)
+            if cred == None:
+                continue
+            un, pw = cred.split(DELIMITER)
+            client = gs.Client()
+            try:
+                cookies = await client.login_with_password(un, pw)
+            except gs.GenshinException as e:
+                embed = Embed(
+                    description=f"Error: {e}",
+                    colour=Colour.brand_red()
+                )
+                await ctx.reply(embed=embed)
+                return
+            else:
+                account.cookie_token = cookies["cookie_token_v2"]
+                account.ltoken_v2 = cookies["ltoken_v2"]
+                db_session.commit()
+                successful_retrieves.append(account.name)
+                time.sleep(TIME_BETWEEN_REDEEMS)
+
+        embed = Embed(
+            description="Cookie tokens retrieved for the following accounts:\n" + "\n".join(successful_retrieves) + "\n\n$redeem and $sredeem will automatically redeem codes those accounts until the cookies expire!\nRemember to use $purge to lock the keyring after use.",
+            colour=Colour.brand_green()
+        )
+        await ctx.reply(embed=embed)
+
+    @commands.command(aliases=["purge"], description="Lock keyring to prevent unauthorized access")
+    @commands.check(is_owner)
+    async def lock_keyring(self, ctx: Context):
+        self.keyring_unlocked = False
+        del self.kr
+        self.kr = CryptFileKeyring()
+        embed = Embed(
+            description="Keyring locked.",
+            colour=Colour.brand_green()
+        )
+        await ctx.reply(embed=embed)
+
+    @commands.command(description="Redeem code for all genshin accounts with cookie_token")
     async def redeem(self, ctx: Context, code: str=None):
         if code == None:
             embed = Embed(
@@ -37,7 +126,7 @@ class Redeem(commands.Cog):
             return
         await self.redeem_helper(ctx, code, gs.Game.GENSHIN)
 
-    @commands.command(description="Redeem code for all Star Rail accounts.")
+    @commands.command(description="Redeem code for all Star Rail accounts with cookie_token")
     async def sredeem(self, ctx: Context, code: str=None):
         if code == None:
             embed = Embed(
@@ -181,10 +270,10 @@ class Redeem(commands.Cog):
                 "status": "Not attempted",
             }
             client = gs.Client({
-                "ltuid": acc.ltuid,
-                "ltoken": acc.ltoken,
-                "account_id": acc.ltuid,
-                "cookie_token": acc.cookie_token,
+                "ltuid_v2": acc.ltuid,
+                "ltoken_v2": acc.ltoken_v2,
+                "account_id_v2": acc.ltuid,
+                "cookie_token_v2": acc.cookie_token,
             }, game=gs.Game.GENSHIN)
             try:
                 await client.redeem_code(code, uid=acc.genshin_uid)
@@ -211,10 +300,10 @@ class Redeem(commands.Cog):
                 "status": "Not attempted",
             }
             client = gs.Client({
-                "ltuid": acc.ltuid,
-                "ltoken": acc.ltoken,
-                "account_id": acc.ltuid,
-                "cookie_token": acc.cookie_token,
+                "ltuid_v2": acc.ltuid,
+                "ltoken_v2": acc.ltoken_v2,
+                "account_id_v2": acc.ltuid,
+                "cookie_token_v2": acc.cookie_token,
             }, game=gs.Game.STARRAIL)
             try:
                 await client.redeem_code(code, uid=acc.starrail_uid)
@@ -235,10 +324,10 @@ class Redeem(commands.Cog):
 
     async def redeem_code_for_user(self, acc: HoyolabAccount, code: str, game_type: gs.Game):
         client = gs.Client({
-            "ltuid": acc.ltuid,
-            "ltoken": acc.ltoken,
-            "account_id": acc.ltuid,
-            "cookie_token": acc.cookie_token,
+            "ltuid_v2": acc.ltuid,
+            "ltoken_v2": acc.ltoken_v2,
+            "account_id_v2": acc.ltuid,
+            "cookie_token_v2": acc.cookie_token,
         }, game=game_type)
         try:
             if game_type == gs.Game.GENSHIN:

@@ -37,6 +37,12 @@ def get_recent_starrail_codes() -> list[RedeemedStarRailCode]:
     return db_session.query(RedeemedStarRailCode) \
         .filter(RedeemedStarRailCode.created_at >= datetime.now() - timedelta(days=1)).all()
 
+def get_all_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    if only_enabled:
+        return db_session.query(HoyolabAccount) \
+            .filter(HoyolabAccount.is_disabled.is_(False)).all()
+    return db_session.query(HoyolabAccount).all()
+
 def get_all_genshin_accounts(only_enabled=False) -> list[HoyolabAccount]:
     query = db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.genshin_uid.is_not(None))
