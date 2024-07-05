@@ -58,7 +58,6 @@ class Notes(commands.Cog):
                     "The exception has been logged down, so if it is a genuine problem, please report it to the developer.",
             })
             print(traceback.format_exc(), file=sys.stderr)
-            await ctx.reply(embed=embed)
 
         try:
             starrail_account = get_starrail_acc_by_name(name) if name is not None else get_starrail_acc_by_discord_id(ctx.author.id)
@@ -72,7 +71,6 @@ class Notes(commands.Cog):
                     "The exception has been logged down, so if it is a genuine problem, please report it to the developer.",
             })
             print(traceback.format_exc(), file=sys.stderr)
-            await ctx.reply(embed=embed)
 
         if has_no_account:
             embed = Embed(
