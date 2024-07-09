@@ -11,7 +11,9 @@ from models import HoyolabAccount
 from util import get_genshin_acc_by_discord_id, \
     get_genshin_acc_by_name, \
     get_starrail_acc_by_discord_id, \
-    get_starrail_acc_by_name
+    get_starrail_acc_by_name, \
+    get_zzz_acc_by_discord_id, \
+    get_zzz_acc_by_name
 
 '''All emotes used in this cog.'''
 RESIN = "<:resin:927403591818420265>"
@@ -25,6 +27,9 @@ TB_POWER = "<:trailblaze_power:1116269466095988746>"
 DAILY_TRAINING = "<:dailytraining:1170268830422020177>"
 KURUKURU = "<a:kurukuru:1166577731429998663>"
 KIRANYAN = "<:kiranyan1:1126353426880667688><:kiranyan2:1126353457570402364>" * 3 + "<:kiranyan3:1126353472065917028>"
+BANGBOO = "<:bangboo:1259442260010078250>"
+BATTERY_CHARGE = "<:batterycharge:1259443153509941280>"
+DAILY_ENGAGEMENT = "<:dailyengagement:1259442854950993961>"
 
 CHECKIN_URL = "https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481"
 
@@ -71,10 +76,23 @@ class Notes(commands.Cog):
                     "The exception has been logged down, so if it is a genuine problem, please report it to the developer.",
             })
             print(traceback.format_exc(), file=sys.stderr)
+        
+        try:
+            zzz_account = get_zzz_acc_by_name(name) if name is not None else get_zzz_acc_by_discord_id(ctx.author.id)
+            if zzz_account is not None:
+                has_no_account = False
+                output.append(await self.zzz_notes(ctx,zzz_account))
+        except Exception as e:
+            output.append({
+                "title": "Exception occured while retrieving ZZZ notes",
+                "description": "This is likely due to on-going maintenance.\n" + \
+                    "The exception has been logged down, so if it is a genuine problem, please report it to the developer.",
+            })
+            print(traceback.format_exc(), file=sys.stderr)
 
         if has_no_account:
             embed = Embed(
-                description=f'Error: User not found or does not have a Genshin & Star Rail account: {name}',
+                description=f'Error: User not found or does not have a Genshin, Star Rail or ZZZ account: {name}',
                 colour=Colour.brand_red(),
             )
             await ctx.reply(embed=embed)
@@ -185,7 +203,6 @@ class Notes(commands.Cog):
                 if expdone_time == "now":
                     continue
                 desc += f"{assignment_counter[expdone_time]} ready at {expdone_time}\n"
-            desc += "\n"
 
             return {
                 "title": f"{KURUKURU} Star Rail Notes for {starrail_account.name}",
@@ -194,6 +211,33 @@ class Notes(commands.Cog):
         except Exception as e:
             # pass back to the main function to handle
             raise e
+    
+    async def zzz_notes(self, ctx: Context, zzz_account: HoyolabAccount):
+        try:
+            notes = await self.get_zzz_notes(zzz_account)
+
+            # Battery Charge
+            desc = f"{BATTERY_CHARGE} {notes.battery_charge.current}/{notes.battery_charge.max}"
+            if notes.battery_charge.seconds_till_full == 0:
+                desc += KLEE_DERP
+            else:
+                maxout_time = datetime.datetime.now() + datetime.timedelta(seconds=notes.battery_charge.seconds_till_full)
+                desc += maxout_time.strftime(" (Maxout - %I:%M %p)")
+
+            # Daily Engagement
+            desc += f"\n{DAILY_ENGAGEMENT} {notes.engagement.current}/{notes.engagement.max}"
+
+            # Scratch Card
+            if not notes.scratch_card_completed:
+                desc += "\nScratch card not completed! :dog:"
+
+            return {
+                "title": f"{BANGBOO} ZZZ Notes for {zzz_account.name}",
+                "description": desc
+            }
+        except Exception as e:
+            raise e
+
     
     @commands.command(description="Don't shout. Alias for $notes.")
     async def RE(self, ctx):
@@ -211,3 +255,7 @@ class Notes(commands.Cog):
     async def get_starrail_notes(self, account: HoyolabAccount):
         client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
         return await client.get_starrail_notes(uid=account.starrail_uid)
+
+    async def get_zzz_notes(self, account: HoyolabAccount):
+        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        return await client.get_zzz_notes(uid=account.zzz_uid)

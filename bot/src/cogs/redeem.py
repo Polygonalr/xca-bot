@@ -13,6 +13,7 @@ from dotenv import dotenv_values
 from models import HoyolabAccount
 from util import get_all_genshin_accounts_with_token, \
     get_all_starrail_accounts_with_token, \
+    get_all_zzz_accounts_with_token, \
     get_account_by_name, \
     add_genshin_code as add_gs, \
     add_starrail_code as add_sr, \
@@ -45,7 +46,8 @@ class Redeem(commands.Cog):
         self.bot = bot
         self.keyring_unlocked = False
         self.kr = CryptFileKeyring()
-    
+
+    # Alternatively use utils/loadcookie.py
     @commands.command(description="Unlock keyring to retrieve cookie_token_v2")
     @commands.check(is_owner)
     async def unlock_keyring(self, ctx: Context, master_password: str=None):
@@ -137,6 +139,17 @@ class Redeem(commands.Cog):
             return
         await self.redeem_helper(ctx, code, gs.Game.STARRAIL)
 
+    @commands.command(description="Redeem code for all ZZZ accounts with cookie_token")
+    async def zredeem(self, ctx: Context, code: str=None):
+        if code == None:
+            embed = Embed(
+                description="Error: please specify a code.\nUsage: $redeem <code>",
+                colour=Colour.brand_red()
+            )
+            await ctx.reply(embed=embed)
+            return
+        await self.redeem_helper(ctx, code, gs.Game.ZZZ)
+
     @commands.command(description="Redeem a Genshin code for a specific account.")
     async def redeemfor(self, ctx: Context, name: str=None, code: str=None):
         await self.redeem_for_helper(ctx, name, code, gs.Game.GENSHIN)
@@ -161,6 +174,7 @@ class Redeem(commands.Cog):
         
     async def redeem_helper(self, ctx: Context, code: str, game_type: gs.Game):
         # ON THE ASSUMPTION THAT GENSHIN CODES WILL NOT BE THE SAME AS STAR RAIL CODES
+        # TODO implement for ZZZ though not necessary
         if check_gs(code) or check_sr(code):
             embed = Embed(
                 description="Error: code has already been redeemed.",
@@ -177,8 +191,17 @@ class Redeem(commands.Cog):
 
         if game_type == gs.Game.GENSHIN:
             logs = await self.redeem_genshin_code(code)
-        else:
+        elif game_type == gs.Game.STARRAIL:
             logs = await self.redeem_starrail_code(code)
+        elif game_type == gs.Game.ZZZ:
+            logs = await self.redeem_zzz_code(code)
+        else:
+            embed = Embed(
+                description="Error: unexpected game type.",
+                colour=Colour.brand_red(),
+            )
+            await ctx.reply(embed=embed)
+            return
         
         if len(logs) == 0:
             embed = Embed(
@@ -320,6 +343,35 @@ class Redeem(commands.Cog):
                 return redeemed_users
             time.sleep(TIME_BETWEEN_REDEEMS)
         add_sr(code)
+        return redeemed_users
+
+    async def redeem_zzz_code(self, code: str):
+        redeemed_users = []
+        for acc in get_all_zzz_accounts_with_token():
+            redemption_attempt = {
+                "name": acc.name,
+                "status": "Not attempted",
+            }
+            client = gs.Client({
+                "ltuid_v2": acc.ltuid,
+                "ltoken_v2": acc.ltoken_v2,
+                "account_id_v2": acc.ltuid,
+                "cookie_token_v2": acc.cookie_token,
+            }, game=gs.Game.ZZZ)
+            try:
+                await client.redeem_code(code, uid=acc.zzz_uid)
+            except gs.GenshinException as e:
+                if "Cookies are not valid" in str(e):
+                    remove_cookie_token(acc)
+                    redemption_attempt['status'] = "Cookies are not valid and have been removed from the database."
+                else:
+                    redemption_attempt['status'] = str(e)
+            else:
+                redemption_attempt['status'] = "Redeemed!"
+            redeemed_users.append(redemption_attempt)
+            if "Invalid redemption code" in redemption_attempt['status']:
+                return redeemed_users
+            time.sleep(TIME_BETWEEN_REDEEMS)
         return redeemed_users
 
     async def redeem_code_for_user(self, acc: HoyolabAccount, code: str, game_type: gs.Game):

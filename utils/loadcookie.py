@@ -27,8 +27,8 @@ async def main():
         un, pw = cred.split(DELIMITER)
         client = gs.Client()
         cookies = await client.login_with_password(un, pw)
-        account.cookie_token = cookies["cookie_token_v2"]
-        account.ltoken_v2 = cookies["ltoken_v2"]
+        account.cookie_token = cookies.cookie_token_v2
+        account.ltoken_v2 = cookies.ltoken_v2
         db_session.commit()
         time.sleep(2.5)
 

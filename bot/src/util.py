@@ -74,6 +74,11 @@ def get_all_starrail_accounts_with_token() -> list[HoyolabAccount]:
         .filter(HoyolabAccount.starrail_uid.is_not(None),
                 HoyolabAccount.cookie_token.is_not(None)).all()
 
+def get_all_zzz_accounts_with_token() -> list[HoyolabAccount]:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.zzz_uid.is_not(None),
+                HoyolabAccount.cookie_token.is_not(None)).all()
+
 def get_accounts_by_discord_id(discord_id: int) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.discord_user_id == discord_id).all()
@@ -98,6 +103,16 @@ def get_starrail_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.discord_user_id == discord_id) \
         .filter(HoyolabAccount.starrail_uid != None).first()
+
+def get_zzz_acc_by_name(name: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.name == name) \
+        .filter(HoyolabAccount.zzz_uid != None).first()
+
+def get_zzz_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.discord_user_id == discord_id) \
+        .filter(HoyolabAccount.zzz_uid != None).first()
 
 def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
