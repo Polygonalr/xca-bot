@@ -28,17 +28,19 @@ class HoyolabAccount(Base):
     name = Column(String)
     ltuid = Column(Integer)
     ltoken = Column(String)
-    cookie_token = Column(String, nullable=True)
+    cookie_token = Column(String, nullable=True) # actually cookie_token_v2, cookie_token is deprecated
+    ltoken_v2 = Column(String, nullable=True)
     is_disabled = Column(Boolean)
 
     starrail_uid = Column(Integer, nullable=True)
     genshin_uid = Column(Integer, nullable=True)
+    zzz_uid = Column(Integer, nullable=True)
 
     discord_user_id = Column(Integer, ForeignKey("discord_users.id"))
     discord_user = relationship("DiscordUser", back_populates="hoyolab_accounts")
     daily_checkin_status = relationship("DailyCheckInStatus", back_populates="account")
 
-    def __init__(self, name: str, ltuid: int, ltoken: str, cookie_token: str, discord_user_id: int, starrail_uid: int = None, genshin_uid: int = None):
+    def __init__(self, name: str, ltuid: int, ltoken: str, cookie_token: str, discord_user_id: int, starrail_uid: int = None, genshin_uid: int = None, zzz_uid: int = None):
         self.name = name
         self.ltuid = ltuid
         self.ltoken = ltoken
@@ -47,6 +49,7 @@ class HoyolabAccount(Base):
         self.is_disabled = False
         self.starrail_uid = starrail_uid
         self.genshin_uid = genshin_uid
+        self.zzz_uid = zzz_uid
 
 
     def __repr__(self):

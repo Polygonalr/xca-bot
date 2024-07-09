@@ -8,6 +8,10 @@ from .list import List
 from .moc import MOC
 from .buttontest import ButtonTest
 from .simu import Simu
+from .enka import Enka
+from .pf import Pf
+from .hsr_showbuild import HSRShowBuild
+from .apcshadow import ApcShadow
 
 all_cogs = [
     Admin,
@@ -19,5 +23,9 @@ all_cogs = [
     List,
     MOC,
     ButtonTest,
-    Simu
+    Simu,
+    Enka,
+    Pf,
+    HSRShowBuild,
+    ApcShadow
 ]

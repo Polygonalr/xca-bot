@@ -3,10 +3,12 @@ import genshin as gs
 
 from models import DailyCheckInStatus, CheckInStatus, HoyolabAccount
 from database import init_db, db_session
-from util import get_all_genshin_accounts, get_all_starrail_accounts
+from util import get_all_genshin_accounts, get_all_starrail_accounts, get_all_zzz_accounts
+import traceback
+import logging
 
 '''
-Claim daily rewards for all Genshin and Star Rail accounts.
+Claim daily rewards for all Genshin, HSR and ZZZ accounts.
 Badly written code without DRY but it works for now.
 '''
 async def checkin():
@@ -21,11 +23,15 @@ async def checkin():
             new_status = CheckInStatus.success
         except gs.AlreadyClaimed:
             new_status = CheckInStatus.claimed
-        except gs.GeetestTriggered:
+        except gs.DailyGeetestTriggered:
             new_status = CheckInStatus.failed
             # Not too sure which 2 lines of code below works better, so might as well try both
             db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
             acc.is_disabled = True
+        except gs.InvalidCookies:
+            print("Invalid cookies")
+        except Exception as e:
+            logging.error(traceback.format_exc())
         
         if query.count() == 0:
             status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, new_status)
@@ -35,7 +41,7 @@ async def checkin():
         db_session.commit()
         await asyncio.sleep(5)
 
-    for acc in get_all_starrail_accounts(only_enabled=False):
+    for acc in get_all_starrail_accounts(only_enabled=True):
         client = gs.Client({
             "ltuid": acc.ltuid,
             "ltoken": acc.ltoken,
@@ -46,8 +52,12 @@ async def checkin():
             new_status = CheckInStatus.success
         except gs.AlreadyClaimed:
             new_status = CheckInStatus.claimed
-        except gs.GeetestTriggered:
+        except gs.DailyGeetestTriggered:
             new_status = CheckInStatus.failed
+        except gs.InvalidCookies:
+            print("Invalid cookies")
+        except Exception as e:
+            logging.error(traceback.format_exc())
         
         if query.count() == 0:
             status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, new_status)
@@ -57,6 +67,19 @@ async def checkin():
         db_session.commit()
         await asyncio.sleep(5)
             
+    for acc in get_all_zzz_accounts(only_enabled=False):
+        client = gs.Client({
+            "ltuid": acc.ltuid,
+            "ltoken": acc.ltoken,
+        }, game=gs.Game.ZZZ)
+        try:
+            await client.claim_daily_reward(reward=False)
+        except gs.AlreadyClaimed:
+            print("Already claimed")
+        except gs.DailyGeetestTriggered:
+            print("Damn captcha")
+
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
     init_db()

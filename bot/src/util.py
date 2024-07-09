@@ -37,6 +37,12 @@ def get_recent_starrail_codes() -> list[RedeemedStarRailCode]:
     return db_session.query(RedeemedStarRailCode) \
         .filter(RedeemedStarRailCode.created_at >= datetime.now() - timedelta(days=1)).all()
 
+def get_all_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    if only_enabled:
+        return db_session.query(HoyolabAccount) \
+            .filter(HoyolabAccount.is_disabled.is_(False)).all()
+    return db_session.query(HoyolabAccount).all()
+
 def get_all_genshin_accounts(only_enabled=False) -> list[HoyolabAccount]:
     query = db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.genshin_uid.is_not(None))
@@ -51,6 +57,13 @@ def get_all_starrail_accounts(only_enabled=False) -> list[HoyolabAccount]:
         return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
     return query.all()
 
+def get_all_zzz_accounts(only_enabled=False) -> list[HoyolabAccount]:
+    query = db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.zzz_uid.is_not(None))
+    if only_enabled:
+        return query.filter(HoyolabAccount.is_disabled.is_(False)).all()
+    return query.all()
+
 def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.genshin_uid.is_not(None),
@@ -59,6 +72,11 @@ def get_all_genshin_accounts_with_token() -> list[HoyolabAccount]:
 def get_all_starrail_accounts_with_token() -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.starrail_uid.is_not(None),
+                HoyolabAccount.cookie_token.is_not(None)).all()
+
+def get_all_zzz_accounts_with_token() -> list[HoyolabAccount]:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.zzz_uid.is_not(None),
                 HoyolabAccount.cookie_token.is_not(None)).all()
 
 def get_accounts_by_discord_id(discord_id: int) -> list[HoyolabAccount]:
@@ -86,6 +104,16 @@ def get_starrail_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
         .filter(HoyolabAccount.discord_user_id == discord_id) \
         .filter(HoyolabAccount.starrail_uid != None).first()
 
+def get_zzz_acc_by_name(name: str) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.name == name) \
+        .filter(HoyolabAccount.zzz_uid != None).first()
+
+def get_zzz_acc_by_discord_id(discord_id: int) -> HoyolabAccount:
+    return db_session.query(HoyolabAccount) \
+        .filter(HoyolabAccount.discord_user_id == discord_id) \
+        .filter(HoyolabAccount.zzz_uid != None).first()
+
 def get_accounts_by_name(name: str) -> list[HoyolabAccount]:
     return db_session.query(HoyolabAccount) \
         .filter(HoyolabAccount.name == name).all()
@@ -100,6 +128,7 @@ def get_account_by_ltuid(ltuid: str) -> HoyolabAccount:
 
 def remove_cookie_token(acc: HoyolabAccount) -> None:
     acc.cookie_token = None
+    acc.ltoken_v2 = None
     db_session.commit()
 
 def get_genshin_checkin_status(acc: HoyolabAccount) -> DailyCheckInStatus:
