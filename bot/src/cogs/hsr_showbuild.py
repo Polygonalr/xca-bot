@@ -5,7 +5,7 @@ from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 from models import HoyolabAccount
-from util import get_starrail_acc_by_discord_id, get_starrail_acc_by_name
+from util import get_starrail_acc_by_discord_id, get_starrail_acc_by_name, hoyolab_client_init
 
 '''Cog to show build of a character in HSR.'''
 class HSRShowBuild(commands.Cog):
@@ -89,5 +89,5 @@ class HSRShowBuild(commands.Cog):
         await ctx.reply(embeds=embed_list)
     
     async def get_char_details(self, account: HoyolabAccount) -> StarRailDetailCharacters:
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.ZZZ)
         return await client.get_starrail_characters(uid=account.starrail_uid)

@@ -3,7 +3,7 @@ import genshin as gs
 
 from models import DailyCheckInStatus, CheckInStatus, HoyolabAccount
 from database import init_db, db_session
-from util import get_all_genshin_accounts, get_all_starrail_accounts, get_all_zzz_accounts
+from util import hoyolab_client_init, get_all_genshin_accounts, get_all_starrail_accounts, get_all_zzz_accounts
 import traceback
 import logging
 
@@ -13,10 +13,7 @@ Badly written code without DRY but it works for now.
 '''
 async def checkin():
     for acc in get_all_genshin_accounts(only_enabled=True):
-        client = gs.Client({
-            "ltuid": acc.ltuid,
-            "ltoken": acc.ltoken,
-        }, game=gs.Game.GENSHIN)
+        client = hoyolab_client_init(acc, gs.Game.GENSHIN)
         query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
         try:
             await client.claim_daily_reward(reward=False)
@@ -29,7 +26,7 @@ async def checkin():
             db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
             acc.is_disabled = True
         except gs.InvalidCookies:
-            print("Invalid cookies")
+            print("GI: Invalid cookies")
         except Exception as e:
             logging.error(traceback.format_exc())
         
@@ -42,20 +39,18 @@ async def checkin():
         await asyncio.sleep(5)
 
     for acc in get_all_starrail_accounts(only_enabled=True):
-        client = gs.Client({
-            "ltuid": acc.ltuid,
-            "ltoken": acc.ltoken,
-        }, game=gs.Game.STARRAIL)
+        client = hoyolab_client_init(acc, gs.Game.STARRAIL)
         query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
         try:
             await client.claim_daily_reward(reward=False)
             new_status = CheckInStatus.success
         except gs.AlreadyClaimed:
             new_status = CheckInStatus.claimed
+            print("HSR: Already claimed")
         except gs.DailyGeetestTriggered:
             new_status = CheckInStatus.failed
         except gs.InvalidCookies:
-            print("Invalid cookies")
+            print("HSR: Invalid cookies")
         except Exception as e:
             logging.error(traceback.format_exc())
         
@@ -68,16 +63,15 @@ async def checkin():
         await asyncio.sleep(5)
             
     for acc in get_all_zzz_accounts(only_enabled=False):
-        client = gs.Client({
-            "ltuid": acc.ltuid,
-            "ltoken": acc.ltoken,
-        }, game=gs.Game.ZZZ)
+        client = hoyolab_client_init(acc, gs.Game.ZZZ)
         try:
             await client.claim_daily_reward(reward=False)
         except gs.AlreadyClaimed:
-            print("Already claimed")
+            print("ZZZ: Already claimed")
         except gs.DailyGeetestTriggered:
-            print("Damn captcha")
+            print("ZZZ: Damn captcha")
+        except gs.InvalidCookies:
+            print("ZZZ: Invalid cookies")
 
         await asyncio.sleep(5)
 

@@ -30,6 +30,7 @@ class HoyolabAccount(Base):
     ltoken = Column(String)
     cookie_token = Column(String, nullable=True) # actually cookie_token_v2, cookie_token is deprecated
     ltoken_v2 = Column(String, nullable=True)
+    ltuid_v2 = Column(String, nullable=True)
     is_disabled = Column(Boolean)
 
     starrail_uid = Column(Integer, nullable=True)

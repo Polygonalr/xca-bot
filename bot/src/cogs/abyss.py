@@ -3,7 +3,7 @@ from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 import traceback
-from util import get_genshin_acc_by_discord_id, get_genshin_acc_by_name
+from util import get_genshin_acc_by_discord_id, get_genshin_acc_by_name, hoyolab_client_init
 
 '''All emotes used in this cog'''
 ABYSS_STAR = "<:abyssstar:948380524462878760>"
@@ -122,5 +122,5 @@ class Abyss(commands.Cog):
 
     
     async def get_abyss(self, account, prevFlag):
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.GENSHIN)
         return await client.get_genshin_spiral_abyss(uid=account.genshin_uid, previous=prevFlag)
