@@ -4,7 +4,7 @@ from nextcord import Embed, Colour
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 import traceback
-from util import get_starrail_acc_by_name, get_starrail_acc_by_discord_id
+from util import get_starrail_acc_by_name, get_starrail_acc_by_discord_id, hoyolab_client_init
 from models import HoyolabAccount
 
 class Simu(commands.Cog):
@@ -30,5 +30,5 @@ class Simu(commands.Cog):
         await ctx.reply(embed=embed)
 
     async def get_simu(self, account: HoyolabAccount) -> StarRailRogue:
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.STARRAIL)
         return await client.get_starrail_rogue(uid=account.starrail_uid)

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from genshin.types import Game
+from genshin.client import Client
 from models import DiscordUser, \
     HoyolabAccount, \
     RedeemedGenshinCode, \
@@ -136,3 +137,10 @@ def get_genshin_checkin_status(acc: HoyolabAccount) -> DailyCheckInStatus:
         .filter(DailyCheckInStatus.genshin_uid == acc.genshin_uid) \
         .filter(DailyCheckInStatus.game_type == Game.GENSHIN) \
         .first()
+
+def hoyolab_client_init(acc: HoyolabAccount, game: Game) -> Client:
+    client = Client({
+            "ltuid_v2": acc.ltuid,
+            "ltoken_v2": acc.ltoken_v2,
+        }, game=game)
+    return client

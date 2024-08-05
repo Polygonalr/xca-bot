@@ -6,7 +6,7 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 from nextcord.ui import button, View
 import traceback
-from util import get_starrail_acc_by_name, get_starrail_acc_by_discord_id
+from util import get_starrail_acc_by_name, get_starrail_acc_by_discord_id, hoyolab_client_init
 from models import HoyolabAccount
 
 '''All emotes used in this cog'''
@@ -77,7 +77,7 @@ class Pf(commands.Cog):
     
     # TODO cache the id to name mapping
     async def get_characters(self, account: HoyolabAccount):
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.STARRAIL)
         characters = await client.get_starrail_characters(uid=account.starrail_uid)
         mapping = {}
         for character in characters.avatar_list:
@@ -85,5 +85,5 @@ class Pf(commands.Cog):
         return mapping
 
     async def get_pf(self, account: HoyolabAccount, prevFlag) -> StarRailPureFiction:
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.STARRAIL)
         return await client.get_starrail_pure_fiction(uid=account.starrail_uid, previous=prevFlag)

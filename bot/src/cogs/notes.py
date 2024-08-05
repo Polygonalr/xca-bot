@@ -13,7 +13,8 @@ from util import get_genshin_acc_by_discord_id, \
     get_starrail_acc_by_discord_id, \
     get_starrail_acc_by_name, \
     get_zzz_acc_by_discord_id, \
-    get_zzz_acc_by_name
+    get_zzz_acc_by_name, \
+    hoyolab_client_init
 
 '''All emotes used in this cog.'''
 RESIN = "<:resin:927403591818420265>"
@@ -245,17 +246,17 @@ class Notes(commands.Cog):
         await self.notes(ctx, None)
         
     async def get_genshin_notes(self, account: HoyolabAccount):
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.GENSHIN)
         return await client.get_genshin_notes(uid=account.genshin_uid)
 
     async def get_genshin_checkin(self, account: HoyolabAccount):
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.GENSHIN)
         return await client.get_reward_info(game=gs.Game.GENSHIN)
 
     async def get_starrail_notes(self, account: HoyolabAccount):
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.STARRAIL)
         return await client.get_starrail_notes(uid=account.starrail_uid)
 
     async def get_zzz_notes(self, account: HoyolabAccount):
-        client = gs.Client({"ltuid": account.ltuid, "ltoken": account.ltoken})
+        client = hoyolab_client_init(account, gs.Game.ZZZ)
         return await client.get_zzz_notes(uid=account.zzz_uid)
