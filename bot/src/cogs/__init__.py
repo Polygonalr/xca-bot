@@ -12,6 +12,7 @@ from .enka import Enka
 from .pf import Pf
 from .hsr_showbuild import HSRShowBuild
 from .apcshadow import ApcShadow
+from .shiyu import Shiyu
 
 all_cogs = [
     Admin,
@@ -27,5 +28,6 @@ all_cogs = [
     Enka,
     Pf,
     HSRShowBuild,
-    ApcShadow
+    ApcShadow,
+    Shiyu
 ]
