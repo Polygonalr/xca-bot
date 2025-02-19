@@ -69,16 +69,12 @@ class Abyss(commands.Cog):
 
             '''Calculate time taken between 9-1 and 12-3'''
             if len(floor_12.chambers) == 3:
-                floor_9 = next((floor for floor in floors if floor.floor == 9), None)
-                floor_10 = next((floor for floor in floors if floor.floor == 10), None)
                 floor_11 = next((floor for floor in floors if floor.floor == 11), None)
-                if floor_9.chambers[0].battles[0].timestamp < floor_10.chambers[0].battles[0].timestamp and \
-                    floor_10.chambers[0].battles[0].timestamp < floor_11.chambers[0].battles[0].timestamp and \
-                    floor_11.chambers[0].battles[0].timestamp < floor_12.chambers[0].battles[0].timestamp:
-                    time_taken = floor_12.chambers[2].battles[1].timestamp - floor_9.chambers[0].battles[0].timestamp
-                    desc += f"Time taken between 9-1 and 12-3: {time_taken}\n"
+                if floor_11.chambers[0].battles[0].timestamp < floor_12.chambers[0].battles[0].timestamp:
+                    time_taken = floor_12.chambers[2].battles[1].timestamp - floor_11.chambers[0].battles[0].timestamp
+                    desc += f"Time taken between 11-1 and 12-3: {time_taken}\n"
                 else:
-                    desc += f"{account.name} did not complete floors 9 to 12 in order. Time taken to clear spiral abyss cannot be estimated."
+                    desc += f"{account.name} did not complete floors 11 to 12 in order. Time taken to clear spiral abyss cannot be estimated."
         else:
             not_found_msg = f"{account.name} has not attempted floor 12 yet!"
             embed.add_field(name=not_found_msg, value='\u200b')
@@ -88,7 +84,7 @@ class Abyss(commands.Cog):
 
     @commands.command(description="Recaps characters used in the previous Spiral Abyss cycle clear.")
     async def abyssrecap(self, ctx: Context, name: str=None):
-        floors = [9, 10, 11, 12]
+        floors = [11, 12]
         if name == None:
             account = get_genshin_acc_by_discord_id(ctx.author.id)
         else:
