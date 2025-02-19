@@ -6,7 +6,7 @@ Yet another Discord bot (bundled with an optional Telegram bot) that mainly offe
 
 ## Requirements
 
-* Python 3.9
+* Python 3.12
 * SQLite3
 
 ## Deployment
