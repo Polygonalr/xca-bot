@@ -101,7 +101,7 @@ class Shiyu(commands.Cog):
 
         if account == None:
             embed = Embed(
-                description=f'Error: User not found or does not have a Star Rail account: {name}',
+                description=f'Error: User not found or does not have a Zenless Zone Zero account: {name}',
                 colour=Colour.brand_red(),
             )
             await ctx.reply(embed=embed)
