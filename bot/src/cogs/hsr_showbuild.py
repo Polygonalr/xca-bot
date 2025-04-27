@@ -56,7 +56,7 @@ class HSRShowBuild(commands.Cog):
         light_cone_rank = char_info[0].equip.rank if char_info[0].equip is not None else "None"
 
         main_embed = Embed(
-            title=f"Showing build details for {starrail_account.name}'s {char_info[0].name}",
+            title=f"Showing build details for {starrail_account.name}'s {char_info[0].name} (E{char_info[0].rank})",
             description=f"Light Cone: {light_cone_name} (Lvl {light_cone_lvl} S{light_cone_rank})",
             colour=Colour.brand_green(),
         )
