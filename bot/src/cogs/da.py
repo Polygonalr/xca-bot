@@ -51,8 +51,8 @@ class DeadlyAssault(commands.Cog):
         else:
             desc += f'Score: {da.total_score} | Stars: {da.total_star} | Ranking: {da.rank_percent}'
             for challenge in da.challenges:
-                field_name = f"Boss: {challenge.boss.name}"
-                field_val = f"Score: {challenge.score} {DA_STAR * challenge.star}\n"
+                field_name = f"{challenge.boss.name}"
+                field_val = f"Score: **{challenge.score}** {DA_STAR * challenge.star}\n"
                 field_val += f"Buff: **{challenge.buffs[0].name}**\n"
                 field_val += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in challenge.agents)
                 field_val += f"\n{bangboo_names[challenge.bangboo.id]} (lvl {challenge.bangboo.level})"

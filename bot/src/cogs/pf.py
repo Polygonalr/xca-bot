@@ -63,7 +63,7 @@ class Pf(commands.Cog):
 
             for floor in pf_floors:
                 total_score = floor.node_1.score + floor.node_2.score
-                details += f"{strip(' '.join(floor.name.split(' ')[-2:]))}\n{floor.star_num} {MOC_STAR}\nFirst Half: {floor.node_1.score}\nSecond Half: {floor.node_2.score}\nTotal score: {total_score}\n\n"
+                details += f"{strip(' '.join(floor.name.split(' ')[-2:]))}\n{MOC_STAR * floor.star_num}\nFirst Half: {floor.node_1.score}\nSecond Half: {floor.node_2.score}\nTotal score: {total_score}\n\n"
                 first_team += f"**Buff**: { 'No buff' if floor.node_1.buff is None else floor.node_1.buff.name }\n"
                 first_team += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.avatars) + "\n\n"
                 second_team += f"**Buff**: { 'No buff' if floor.node_2.buff is None else floor.node_2.buff.name }\n"
