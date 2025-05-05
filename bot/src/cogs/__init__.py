@@ -13,6 +13,8 @@ from .pf import Pf
 from .hsr_showbuild import HSRShowBuild
 from .apcshadow import ApcShadow
 from .shiyu import Shiyu
+from .da import DeadlyAssault
+from .zzz_showbuild import ZZZShowBuild
 
 all_cogs = [
     Admin,
@@ -29,5 +31,7 @@ all_cogs = [
     Pf,
     HSRShowBuild,
     ApcShadow,
-    Shiyu
+    Shiyu,
+    DeadlyAssault,
+    ZZZShowBuild
 ]

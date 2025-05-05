@@ -56,7 +56,7 @@ class HSRShowBuild(commands.Cog):
         light_cone_rank = char_info[0].equip.rank if char_info[0].equip is not None else "None"
 
         main_embed = Embed(
-            title=f"Showing build details for {starrail_account.name}'s {char_info[0].name}",
+            title=f"Showing build details for {starrail_account.name}'s {char_info[0].name} (E{char_info[0].rank})",
             description=f"Light Cone: {light_cone_name} (Lvl {light_cone_lvl} S{light_cone_rank})",
             colour=Colour.brand_green(),
         )
@@ -73,7 +73,7 @@ class HSRShowBuild(commands.Cog):
             colour=Colour.brand_green(),
         )
         for relic in char_info[0].relics:
-            relic_stats = f"{relic.main_property.value} {relic.main_property.info.name}"
+            relic_stats = f"**{relic.main_property.value} {relic.main_property.info.name}**"
             for property in relic.properties:
                 relic_stats += f"\n{property.value} {property.info.name}"
             relic_embed.add_field(name=f"{relic.name} ({relic.rarity}* Lvl {relic.level})", value=relic_stats, inline=True)
@@ -89,5 +89,5 @@ class HSRShowBuild(commands.Cog):
         await ctx.reply(embeds=embed_list)
     
     async def get_char_details(self, account: HoyolabAccount) -> StarRailDetailCharacters:
-        client = hoyolab_client_init(account, gs.Game.ZZZ)
+        client = hoyolab_client_init(account, gs.Game.STARRAIL)
         return await client.get_starrail_characters(uid=account.starrail_uid)
