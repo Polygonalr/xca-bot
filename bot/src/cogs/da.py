@@ -46,17 +46,20 @@ class DeadlyAssault(commands.Cog):
 
         '''Then, grab the data for DA clears'''
         da: DeadlyAssault = await self.get_da(account, prevFlag)
-        if len(da.challenges) == 0:
+        if not da.has_data:
             desc += f'{account.name} has not attempted Deadly Assault yet!'
         else:
             desc += f'Score: {da.total_score} | Stars: {da.total_star} | Ranking: {da.rank_percent}'
-            for challenge in da.challenges:
-                field_name = f"{challenge.boss.name}"
-                field_val = f"Score: **{challenge.score}** {DA_STAR * challenge.star}\n"
-                field_val += f"Buff: **{challenge.buffs[0].name}**\n"
-                field_val += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in challenge.agents)
-                field_val += f"\n{bangboo_names[challenge.bangboo.id]} (lvl {challenge.bangboo.level})"
-                embed.add_field(name=field_name, value=field_val)
+            if len(da.challenges) == 0:
+                desc += f'\nFull challenge data is not available yet!'
+            else:
+                for challenge in da.challenges:
+                    field_name = f"{challenge.boss.name}"
+                    field_val = f"Score: **{challenge.score}** {DA_STAR * challenge.star}\n"
+                    field_val += f"Buff: **{challenge.buffs[0].name}**\n"
+                    field_val += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in challenge.agents)
+                    field_val += f"\n{bangboo_names[challenge.bangboo.id]} (lvl {challenge.bangboo.level})"
+                    embed.add_field(name=field_name, value=field_val)
 
         embed.description = desc
         await ctx.reply(embed=embed)
