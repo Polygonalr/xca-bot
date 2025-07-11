@@ -1,5 +1,5 @@
 import genshin as gs
-from genshin.models import StarRailDetailCharacters
+from genshin.models import StarRailDetailCharacterResponse
 import json
 from nextcord import Embed, Colour
 from nextcord.ext import commands
@@ -88,6 +88,6 @@ class HSRShowBuild(commands.Cog):
         embed_list.append(relic_embed)
         await ctx.reply(embeds=embed_list)
     
-    async def get_char_details(self, account: HoyolabAccount) -> StarRailDetailCharacters:
+    async def get_char_details(self, account: HoyolabAccount) -> StarRailDetailCharacterResponse:
         client = hoyolab_client_init(account, gs.Game.STARRAIL)
         return await client.get_starrail_characters(uid=account.starrail_uid)
