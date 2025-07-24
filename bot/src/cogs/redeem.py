@@ -175,13 +175,13 @@ class Redeem(commands.Cog):
     async def redeem_helper(self, ctx: Context, code: str, game_type: gs.Game):
         # ON THE ASSUMPTION THAT GENSHIN CODES WILL NOT BE THE SAME AS STAR RAIL CODES
         # TODO implement for ZZZ though not necessary
-        if check_gs(code) or check_sr(code):
-            embed = Embed(
-                description="Error: code has already been redeemed.",
-                colour=Colour.brand_red(),
-            )
-            await ctx.reply(embed=embed)
-            return
+        # if check_gs(code) or check_sr(code):
+        #     embed = Embed(
+        #         description="Error: code has already been redeemed.",
+        #         colour=Colour.brand_red(),
+        #     )
+        #     await ctx.reply(embed=embed)
+        #     return
 
         embed = Embed(
             description=f"[{game_type}] Redemption in progress...",
