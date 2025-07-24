@@ -3,18 +3,31 @@ import genshin as gs
 
 from models import DailyCheckInStatus, CheckInStatus, HoyolabAccount
 from database import init_db, db_session
-from util import hoyolab_client_init, get_all_genshin_accounts, get_all_starrail_accounts, get_all_zzz_accounts
+from util import (
+    hoyolab_client_init,
+    get_all_genshin_accounts,
+    get_all_starrail_accounts,
+    get_all_zzz_accounts,
+    get_all_genshin_accounts_with_token,
+    get_all_starrail_accounts_with_token,
+    get_all_zzz_accounts_with_token,
+)
 import traceback
 import logging
 
-'''
+"""
 Claim daily rewards for all Genshin, HSR and ZZZ accounts.
 Badly written code without DRY but it works for now.
-'''
+"""
+
+
 async def checkin():
     for acc in get_all_genshin_accounts(only_enabled=True):
         client = hoyolab_client_init(acc, gs.Game.GENSHIN)
-        query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.GENSHIN)
+        query = db_session.query(DailyCheckInStatus).filter(
+            DailyCheckInStatus.account_id == acc.id,
+            DailyCheckInStatus.game_type == gs.Game.GENSHIN,
+        )
         try:
             await client.claim_daily_reward(reward=False)
             new_status = CheckInStatus.success
@@ -23,13 +36,15 @@ async def checkin():
         except gs.DailyGeetestTriggered:
             new_status = CheckInStatus.failed
             # Not too sure which 2 lines of code below works better, so might as well try both
-            db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update({'is_disabled': True})
+            db_session.query(HoyolabAccount).filter(HoyolabAccount.id == acc.id).update(
+                {"is_disabled": True}
+            )
             acc.is_disabled = True
         except gs.InvalidCookies:
             print("GI: Invalid cookies")
         except Exception as e:
             logging.error(traceback.format_exc())
-        
+
         if query.count() == 0:
             status = DailyCheckInStatus(acc.id, gs.Game.GENSHIN, new_status)
             db_session.add(status)
@@ -40,7 +55,10 @@ async def checkin():
 
     for acc in get_all_starrail_accounts(only_enabled=True):
         client = hoyolab_client_init(acc, gs.Game.STARRAIL)
-        query = db_session.query(DailyCheckInStatus).filter(DailyCheckInStatus.account_id == acc.id, DailyCheckInStatus.game_type == gs.Game.STARRAIL)
+        query = db_session.query(DailyCheckInStatus).filter(
+            DailyCheckInStatus.account_id == acc.id,
+            DailyCheckInStatus.game_type == gs.Game.STARRAIL,
+        )
         try:
             await client.claim_daily_reward(reward=False)
             new_status = CheckInStatus.success
@@ -53,7 +71,7 @@ async def checkin():
             print("HSR: Invalid cookies")
         except Exception as e:
             logging.error(traceback.format_exc())
-        
+
         if query.count() == 0:
             status = DailyCheckInStatus(acc.id, gs.Game.STARRAIL, new_status)
             db_session.add(status)
@@ -61,7 +79,7 @@ async def checkin():
             query.update({"status": new_status})
         db_session.commit()
         await asyncio.sleep(5)
-            
+
     for acc in get_all_zzz_accounts(only_enabled=False):
         client = hoyolab_client_init(acc, gs.Game.ZZZ)
         try:
@@ -74,6 +92,48 @@ async def checkin():
             print("ZZZ: Invalid cookies")
 
         await asyncio.sleep(5)
+
+    """
+    Experiment to keep cookie_token_v2 alive by redeeming code everyday
+    """
+    for acc in get_all_genshin_accounts_with_token():
+        client = gs.Client({
+            "ltuid_v2": acc.ltuid,
+            "ltoken_v2": acc.ltoken_v2,
+            "account_id_v2": acc.ltuid,
+            "cookie_token_v2": acc.cookie_token,
+        }, game=gs.Game.GENSHIN)
+        try:
+            await client.redeem_code("GENSHINGIFT", uid=acc.genshin_uid)
+        except Exception:
+            pass
+        await asyncio.sleep(2.5)
+
+    for acc in get_all_starrail_accounts_with_token():
+        client = gs.Client({
+            "ltuid_v2": acc.ltuid,
+            "ltoken_v2": acc.ltoken_v2,
+            "account_id_v2": acc.ltuid,
+            "cookie_token_v2": acc.cookie_token,
+        }, game=gs.Game.STARRAIL)
+        try:
+            await client.redeem_code("STARRAILGIFT", uid=acc.starrail_uid)
+        except Exception:
+            pass
+        await asyncio.sleep(2.5)
+
+    for acc in get_all_zzz_accounts_with_token():
+        client = gs.Client({
+            "ltuid_v2": acc.ltuid,
+            "ltoken_v2": acc.ltoken_v2,
+            "account_id_v2": acc.ltuid,
+            "cookie_token_v2": acc.cookie_token,
+        }, game=gs.Game.ZZZ)
+        try:
+            await client.redeem_code("ZENLESSGIFT", uid=acc.zzz_uid)
+        except Exception:
+            pass
+        await asyncio.sleep(2.5)
 
 if __name__ == "__main__":
     init_db()
