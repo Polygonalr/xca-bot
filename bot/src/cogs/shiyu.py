@@ -5,6 +5,7 @@ from nextcord import Interaction
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
 from nextcord.ui import button, View
+import datetime
 import traceback
 from util import hoyolab_client_init, get_zzz_acc_by_name, get_zzz_acc_by_discord_id
 from models import HoyolabAccount
@@ -30,12 +31,13 @@ def render_embed(acc_name: str, data: ShiyuDefense, char_names: dict, bangboo_na
         desc += f'{acc_name} has not attempted Shiyu Defense (Critical) yet!'
     else:
         desc += f'Best stage: {floors[0].name}'
+        desc += f'\nTotal battle time: {str(datetime.timedelta(seconds=data.battle_time_47))}'
         details = ""
         firstteam = ""
         secondteam = ""
 
         for floor in floors[page*PAGE_SIZE:page*PAGE_SIZE+stages_to_show]:
-            details += f"{' '.join(floor.name.split(' ')[-2:])}\n{RANK_DICT[floor.rating]}\n\n\n\n"
+            details += f"{' '.join(floor.name.split(' ')[-2:])}\n1st half: {str(floor.node_1.battle_time)}\n2nd half: {str(floor.node_2.battle_time)}\n{RANK_DICT[floor.rating]}\n\n"
             firstteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_1.characters) + "\n"
             firstteam += f"{bangboo_names[floor.node_1.bangboo.id]} (lvl {floor.node_1.bangboo.level})\n\n"
             secondteam += "\n".join(f"{char_names[x.id]} (lvl {x.level})" for x in floor.node_2.characters) + "\n"
