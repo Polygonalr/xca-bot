@@ -31,7 +31,7 @@ def render_embed(acc_name: str, data: ShiyuDefense, char_names: dict, bangboo_na
         desc += f'{acc_name} has not attempted Shiyu Defense (Critical) yet!'
     else:
         desc += f'Best stage: {floors[0].name}'
-        desc += f'\nTotal battle time: {str(datetime.timedelta(seconds=data.battle_time_47))}'
+        desc += f'\nTotal battle time: {str(datetime.timedelta(seconds=data.total_clear_time()))}'
         details = ""
         firstteam = ""
         secondteam = ""

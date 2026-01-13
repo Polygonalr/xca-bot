@@ -1,11 +1,7 @@
 import genshin as gs
-from genshin.models import ShiyuDefense
 from nextcord import Embed, Colour
-from nextcord import Interaction
 from nextcord.ext import commands
 from nextcord.ext.commands import Bot, Context
-from nextcord.ui import button, View
-import traceback
 from util import hoyolab_client_init, get_zzz_acc_by_name, get_zzz_acc_by_discord_id
 from models import HoyolabAccount
 
