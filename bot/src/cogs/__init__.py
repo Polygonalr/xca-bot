@@ -15,6 +15,7 @@ from .apcshadow import ApcShadow
 from .shiyu import Shiyu
 from .da import DeadlyAssault
 from .zzz_showbuild import ZZZShowBuild
+from .arbitration import Arbitration
 
 all_cogs = [
     Admin,
@@ -33,5 +34,6 @@ all_cogs = [
     ApcShadow,
     Shiyu,
     DeadlyAssault,
-    ZZZShowBuild
+    ZZZShowBuild,
+    Arbitration
 ]

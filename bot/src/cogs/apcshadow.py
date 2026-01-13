@@ -82,6 +82,8 @@ class ApcShadow(commands.Cog):
         mapping = {}
         for character in characters.avatar_list:
             mapping[character.id] = character.name
+        for i in range (8000, 8021):
+            mapping[i] = "Trailblazer"
         return mapping
 
     async def get_as(self, account: HoyolabAccount, prevFlag) -> StarRailAPCShadow:
