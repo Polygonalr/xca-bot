@@ -12,9 +12,10 @@ certifi==2022.6.15
 cffi==1.15.0
 charset-normalizer==2.1.0
 cryptography==44.0.1
+endfield-daily-helper==1.0.5
 exceptiongroup==1.1.1
 frozenlist==1.5.0
-genshin @ git+https://github.com/seriaati/genshin.py.git@d68c5f8cfbed71cc60f89f9408450f70d5aa932a
+genshin @ git+https://github.com/seriaati/genshin.py.git@9d180481f4d49a508011ad3fb878bf06f651f3a2
 greenlet==3.1.1
 h11==0.13.0
 httpcore==0.17.2

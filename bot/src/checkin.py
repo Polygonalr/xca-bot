@@ -11,9 +11,11 @@ from util import (
     get_all_genshin_accounts_with_token,
     get_all_starrail_accounts_with_token,
     get_all_zzz_accounts_with_token,
+    get_all_skport_accounts
 )
 import traceback
 import logging
+from endfield_daily.api import EndfieldClient
 
 """
 Claim daily rewards for all Genshin, HSR and ZZZ accounts.
@@ -91,6 +93,13 @@ async def checkin():
         except gs.InvalidCookies:
             print("ZZZ: Invalid cookies")
 
+        await asyncio.sleep(5)
+    
+    for acc in get_all_skport_accounts():
+        client = EndfieldClient(cookie="", token=acc.account_token)
+        result = client.sign_in()
+        if not result.success:
+            print(f"Endfield: Error when checking in for {acc.name} - {result.message}")
         await asyncio.sleep(5)
 
     """

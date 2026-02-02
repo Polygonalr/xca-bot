@@ -13,6 +13,7 @@ class DiscordUser(Base):
     '''Discord user ID'''
     id = Column(Integer, primary_key=True, autoincrement=False)
     hoyolab_accounts = relationship("HoyolabAccount", back_populates="discord_user")
+    skport_accounts = relationship("SKPortAccount", back_populates="discord_user")
 
     def __init__(self, id: int):
         self.id = id
@@ -55,7 +56,16 @@ class HoyolabAccount(Base):
 
     def __repr__(self):
         return f"<HoyolabAccount {self.id} {self.name}>"
+
+class SKPortAccount(Base):
+    __tablename__ = "skport_accounts"
     
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    account_token = Column(String, nullable=True)
+    discord_user_id = Column(Integer, ForeignKey("discord_users.id"))
+    discord_user = relationship("DiscordUser", back_populates="skport_accounts") 
+
 class CheckInStatus(enum.Enum):
     success = 1
     failed = 2
