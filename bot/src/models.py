@@ -64,7 +64,9 @@ class SKPortAccount(Base):
     name = Column(String)
     account_token = Column(String, nullable=True)
     discord_user_id = Column(Integer, ForeignKey("discord_users.id"))
-    discord_user = relationship("DiscordUser", back_populates="skport_accounts") 
+    discord_user = relationship("DiscordUser", back_populates="skport_accounts")
+    cred = Column(String, nullable=True)
+    user_id = Column(Integer, nullable=True)
 
 class CheckInStatus(enum.Enum):
     success = 1
